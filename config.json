@@ -1,0 +1,9 @@
+{
+  "language": "",
+  "main": "./contracts/Faucet.sol",
+  "deploy": "./build/contracts/Faucet.json",
+  "compilers": {
+    "cfxtruffle": "0.0.8",
+    "solc": "0.6.12"
+  }
+}
