@@ -35,11 +35,11 @@ contract Faucet {
     }
 
     //
-    function changeIntervalSeconds(uint256 intervalSeconds) public onlyManager {
+    function setIntervalSeconds(uint256 intervalSeconds) public onlyManager {
         interval = intervalSeconds;
     }
 
-    function changeDefaultAmount(uint256 cfxAmount) public onlyManager {
+    function setDefaultAmount(uint256 cfxAmount) public onlyManager {
         defaultAmount = cfxAmount * 1e18;
     }
 

@@ -25,9 +25,18 @@
                 </el-option>
               </el-select>
             </el-col>
+            <el-col :offset="1" :span="3">
+              <el-tooltip class="item" effect="dark" :content="queryingBalance" placement="bottom" :disabled="!isButtonDisabled">
+                <div>
+                <el-button type="primary" size="mini" :disabled="isButtonDisabled" @click="claim">
+                  领取
+                </el-button>
+                </div>
+              </el-tooltip>
+            </el-col>
           </el-row>
 
-          <el-row type="flex">
+          <el-row type="flex" v-if="isDev">
             <el-col :span="7">代币余额</el-col>
             <el-col :span="10">
               <div class="full-width">
@@ -47,14 +56,10 @@
                 </div>
               </el-tooltip>
             </el-col>
-            <el-col :offset="1" :span="3">
-              <el-button type="primary" size="mini" :disabled="!isFreeState" @click="claim">
-                领取
-              </el-button>
-            </el-col>
+            
           </el-row>
-          <el-divider></el-divider>
-          <el-row type="flex">
+          <el-divider v-if="isDev"></el-divider>
+          <el-row type="flex" v-if="isDev">
             <el-col :span="7">
               代币池余额
               <el-tooltip effect="light" content="代币池余额并非实时更新，用户操作后会进行更新">
@@ -79,7 +84,7 @@
                 </div>
               </el-tooltip>
             </el-col>
-            <el-col :offset="1" :span="2" v-if="isDev">
+            <el-col :offset="1" :span="2">
               <el-input v-model="depositAmount" oninput="value=value.replace(/[^\d]/g,'')" size="mini" :placeholder="defaultDepositAmount">
               </el-input>
             </el-col>
@@ -288,6 +293,9 @@ export default {
     },
     isDev() {
       return this.$store.state.isDev
+    },
+    isButtonDisabled() {
+      return !this.isFreeState || !Boolean(this.account) || !Boolean(this.selectedToken)
     }
   },
   watch: {

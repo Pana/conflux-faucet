@@ -22,7 +22,7 @@ const options = [
 ];
 
 // 1 cfx each claim, 120s interval
-const faucetAddress = "cfxtest:acdpv88uh8s6ay439esubfb8dsf3kwvfs2xu6j5mkh";
+const faucetAddress = "cfxtest:acc31bu3vaeabm8zkkrd3uhdugnesk148aaxhdewfg";
 
 let config = {};
 options.forEach(option => {
@@ -36,10 +36,9 @@ options.forEach(option => {
 });
 
 // faucetContractConfig[netId]
-// 这里仍然赋值
 const faucetContractConfig = {
   1: { abi: faucet.abi, bytecode: faucet.bytecode, address: faucetAddress },
-  1029: { abi: faucet.abi, bytecode: faucet.bytecode, address: faucetAddress }
+  // 1029: { abi: faucet.abi, bytecode: faucet.bytecode, address: faucetAddress }
 };
 
 export { config, faucetContractConfig };
