@@ -112,12 +112,18 @@
     </el-row>
     <el-row type="flex" justify="center">
       <el-col :span="20">
+        <info-panel></info-panel>
+      </el-col>
+    </el-row>
+    <el-row type="flex" justify="center">
+      <el-col :span="20">
         <history-transaction-panel
           v-bind:transactionList="transactionList"
           v-on:reset-transaction-list="resetTransactionList"
         ></history-transaction-panel>
       </el-col>
     </el-row>
+    
   </div>
 </template>
 
@@ -127,10 +133,12 @@ import { TxState, ErrorType } from "../enums";
 import Web3 from "web3";
 import HistoryTransactionPanel from "./HistoryTransactionPanel.vue";
 import CurrentTransactionPanel from "./CurrentTransactionPanel.vue";
+import InfoPanel from './InfoPanel'
 
 export default {
   components: {
     // CsvPanel,
+    InfoPanel,
     HistoryTransactionPanel,
     CurrentTransactionPanel
   },

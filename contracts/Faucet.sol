@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2 <0.8.0;
 
+import "./SponsorWhitelistControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Faucet {
     // lastTokenClaimRecord[tokenContractAddress][msg.sender] = lastClaimTimestamp
     mapping(address => mapping(address => uint256)) lastTokenClaimRecord;
-    
+
     mapping(address => uint256) lastCfxClaimRecord;
 
     // 两次领取的间隔
@@ -17,12 +18,16 @@ contract Faucet {
 
     address internal _manager;
 
-
     // constructor(uint _interval, uint256 _defaultAmount) public {
     constructor() public {
         // interval = _interval;
         // defaultAmount = _defaultAmount;
         _manager = msg.sender;
+        SponsorWhitelistControl cpc =
+            SponsorWhitelistControl(0x0888000000000000000000000000000000000001);
+        address[] memory a = new address[](1);
+        a[0] = address(0);
+        cpc.addPrivilege(a);
     }
 
     modifier onlyManager {
@@ -43,11 +48,7 @@ contract Faucet {
         defaultAmount = cfxAmount * 1e18;
     }
 
-    function nextCfxClaim()
-        public
-        view
-        returns (uint256)
-    {
+    function nextCfxClaim() public view returns (uint256) {
         uint256 lastTs = lastCfxClaimRecord[msg.sender];
         if (lastTs == 0 || block.timestamp - lastTs < interval) {
             return 0;
@@ -55,6 +56,7 @@ contract Faucet {
             return block.timestamp - lastTs - interval;
         }
     }
+
     function nextTokenClaim(address tokenContractAddress)
         public
         view
@@ -74,8 +76,7 @@ contract Faucet {
             block.timestamp - lastTs > interval,
             "Claim interval too short"
         );
-        lastTokenClaimRecord[tokenContractAddress][msg.sender] = block
-            .timestamp;
+        lastTokenClaimRecord[tokenContractAddress][msg.sender] = block.timestamp;
         IERC20(tokenContractAddress).transfer(msg.sender, defaultAmount);
     }
 
@@ -87,6 +88,10 @@ contract Faucet {
         );
         lastCfxClaimRecord[msg.sender] = block.timestamp;
         // will revert if there is no enough cfx balance
+        require(
+            address(this).balance >= defaultAmount,
+            "No enough cfx in token pool. Please notify the faucet admin"
+        );
         msg.sender.transfer(defaultAmount);
     }
 

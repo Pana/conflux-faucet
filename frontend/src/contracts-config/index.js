@@ -22,7 +22,7 @@ const options = [
 ];
 
 // 1 cfx each claim, 120s interval
-const faucetAddress = "cfxtest:acc31bu3vaeabm8zkkrd3uhdugnesk148aaxhdewfg";
+const faucetAddress = "cfxtest:acdj471zng0njskpx3cuu7x3hyjnt3cbt66anu0bem";
 
 let config = {};
 options.forEach(option => {
