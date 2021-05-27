@@ -1,0 +1,17 @@
+{
+  "name": "conflux-testnet-faucet",
+  "version": "0.9.0",
+  "description": "conflux testnet faucet",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "conflux",
+    "dapp"
+  ],
+  "author": "Zhang Wenda",
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/contracts": "^3.4.0"
+  }
+}
