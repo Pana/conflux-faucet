@@ -127,14 +127,6 @@
         ></info-panel>
       </el-col>
     </el-row>
-    <!-- <el-row type="flex" justify="center" v-if="isDev">
-      <el-col :span="20">
-        <history-transaction-panel
-          v-bind:transactionList="transactionList"
-          v-on:reset-transaction-list="resetTransactionList"
-        ></history-transaction-panel>
-      </el-col>
-    </el-row> -->
     <el-dialog :visible.sync="executedDialogVisible" :title="$t('message.successClaim')" width="50%" :show-close="false">
       <el-row>
         <span>
@@ -156,16 +148,13 @@
 import { config, faucetContractConfig } from "../contracts-config";
 import { TxState, ErrorType } from "../enums";
 import Web3 from "web3";
-// import HistoryTransactionPanel from "./HistoryTransactionPanel.vue";
 import CurrentTransactionPanel from "./CurrentTransactionPanel.vue";
 import InfoPanel from "./InfoPanel";
 import { getScanUrl } from '../utils'
 
 export default {
   components: {
-    // CsvPanel,
     InfoPanel,
-    // HistoryTransactionPanel,
     CurrentTransactionPanel
   },
   name: "FaucetPanel",
@@ -186,7 +175,6 @@ export default {
       isNativeToken: false,
 
       txState: TxState.NoTask,
-      // transactionList: [],
       latestTransactionInfo: {
         hash: null,
         selectedToken: null,
@@ -208,7 +196,6 @@ export default {
 
       config: null,
       executedDialogVisible: false,
-      // faucetContract: null,
 
       DEBUG: process.env.NODE_ENV !== "production"
     };
@@ -348,9 +335,6 @@ export default {
     }
   },
   watch: {
-    // transactionList(newVal) {
-    //   localStorage.faucetTransactionList = JSON.stringify(newVal);
-    // },
     account(newVal) {
       if (newVal) {
         // 异步操作
@@ -371,9 +355,6 @@ export default {
     }
   },
   mounted() {
-    // if (localStorage.faucetTransactionList) {
-    //   this.transactionList = JSON.parse(localStorage.faucetTransactionList);
-    // }
 
     // executed immediately after page is fully loaded
     this.$nextTick(function() {
@@ -391,7 +372,6 @@ export default {
       } else {
           this.$notify({
           title: this.txState,
-          // message: this.stateM,
           type: this.stateType,
           offset: 60,
           duration: 6000
@@ -660,9 +640,6 @@ export default {
           this.errors[err._type] = err;
           this.$alert(err.message, this.$t("message.error.error"));
           break;
-        // case ErrorType.CsvError:
-        //   this.errors[err._type] = err;
-        //   break;
         case ErrorType.TransactionError:
           this.errors[err._type] = err;
           this.txState = TxState.Error;
@@ -677,9 +654,6 @@ export default {
       // this.$store.commit("resetCfxBalance");
       this.tokenBalance = null;
     },
-    // resetTransactionList() {
-    //   this.transactionList = [];
-    // },
     resetLatestTransactionInfo() {
       this.latestTransactionInfo = {
         hash: null,
