@@ -4,12 +4,12 @@
       <el-col :span="20">
         <el-card shadow="hover">
           <el-row>
-            <el-col :span="7">代币选择</el-col>
+            <el-col :span="7">{{$t('message.selectToken')}}</el-col>
             <el-col :span="11">
               <el-select
                 v-model="selectedToken"
                 filterable
-                placeholder="下拉选择或键入搜索"
+                :placeholder="$t('message.selectText')"
                 @change="changeToken"
                 size="mini"
                 class="full-width"
@@ -26,10 +26,10 @@
               </el-select>
             </el-col>
             <el-col :offset="1" :span="3">
-              <el-tooltip class="item" effect="dark" :content="queryingBalance" placement="bottom" :disabled="!isButtonDisabled">
+              <el-tooltip class="item" effect="dark" :content="queryingBalance" placement="bottom-start" :disabled="!isButtonDisabled">
                 <div>
                 <el-button type="primary" size="mini" :disabled="isButtonDisabled" @click="claim">
-                  领取
+                  {{$t('message.claim')}}
                 </el-button>
                 </div>
               </el-tooltip>
@@ -205,33 +205,33 @@ export default {
     },
     queryingBalance() {
       if (this.isNativeToken) {
-        return this.cfxBalance === null ? "请连接钱包" : this.sdk.Drip(this.cfxBalance).toCFX();
+        return this.cfxBalance === null ? this.$t('message.warning.connectionWarning') : this.sdk.Drip(this.cfxBalance).toCFX();
       }
 
       if (!this.account) {
-        return "请连接钱包";
+        return this.$t('message.warning.connectionWarning');
       }
 
       if (!this.selectedToken) {
-        return "请选择代币种类";
+        return this.$t('message.warning.tokenWarning');
       }
 
       // tokenBalance is updated using async function
       // check tokenBalance before presenting value
-      return this.tokenBalance ? this.sdk.Drip(this.tokenBalance).toCFX() : "请求中...";
+      return this.tokenBalance ? this.sdk.Drip(this.tokenBalance).toCFX() : this.$t('message.onRequest');
     },
     queryingFaucetBalance() {
       if (this.isNativeToken) {
-        return this.faucetCfxBalance === null ? "请求中..." : this.sdk.Drip(this.faucetCfxBalance).toCFX();
+        return this.faucetCfxBalance === null ? this.$t('message.onRequest') : this.sdk.Drip(this.faucetCfxBalance).toCFX();
       }
 
       if (!this.selectedToken) {
-        return "请选择代币种类";
+        return this.$t('message.warning.tokenWarning');
       }
 
       // tokenBalance is updated using async function
       // check tokenBalance before presenting value
-      return this.faucetTokenBalance ? this.sdk.Drip(this.faucetTokenBalance).toCFX() : "请求中...";
+      return this.faucetTokenBalance ? this.sdk.Drip(this.faucetTokenBalance).toCFX() : this.$t('message.onRequest');
     },
     stateType() {
       switch (this.txState) {
@@ -597,7 +597,7 @@ export default {
           this.tokenBalance = null;
           this.$store.commit("resetCfxBalance");
           this.errors[err._type] = err;
-          this.$alert(err.message, "错误");
+          this.$alert(err.message, this.$t('message.error.error'));
           break;
         // case ErrorType.CsvError:
         //   this.errors[err._type] = err;
@@ -605,7 +605,7 @@ export default {
         case ErrorType.TransactionError:
           this.errors[err._type] = err;
           this.txState = TxState.Error;
-          this.$alert(err.message, "交易执行错误");
+          this.$alert(err.message, this.$t('message.error.transactionError'));
           break;
         default:
       }

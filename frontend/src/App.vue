@@ -4,9 +4,9 @@
       <el-header style="background: #409EFF">
         <el-row class="full-height" type="flex" align="middle" justify="left">
           <el-col :span="6">
-            <label class="white-font bold-font">Conflux 测试网水龙头</label>
+            <label class="white-font bold-font">{{ $t("message.title") }}</label>
           </el-col>
-          <el-col :offset="8" :span="2">
+          <el-col :offset="6" :span="2">
             <el-switch
               style="display: block"
               v-model="isDev"
@@ -17,18 +17,31 @@
             </el-switch>
           </el-col>
           <el-col :offset="1" :span="3">
-            <el-tooltip effect="light" content="在 Conflux Portal 中切换网络">
+            <el-tooltip effect="light" :content="$t('message.tooltip.networkTooltip')">
               <el-tag>{{ networkText }}</el-tag>
             </el-tooltip>
           </el-col>
 
           <el-col :span="4" v-if="!accountConnected">
-            <el-button class="full-width" round v-on:click="authorize">连接钱包</el-button>
+            <el-button class="full-width" round v-on:click="authorize">{{
+              $t("message.connect")
+            }}</el-button>
           </el-col>
           <el-col :span="4" v-if="accountConnected">
             <el-button class="full-width" type="success" @click="showAccount">
               {{ simplifiedAccount }}<i class="el-icon-check el-icon--right"></i>
             </el-button>
+          </el-col>
+          <el-col :span="2">
+            <el-dropdown @command="handleLangCommand" class="full-width">
+              <div class="el-dropdown-link full-width bold-font right-align" style="color: white;">
+                {{ locale }}<i class="el-icon-arrow-down el-icon--right"></i>
+              </div>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item command="zh-CN">中文</el-dropdown-item>
+                <el-dropdown-item command="en">en</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
           </el-col>
         </el-row>
       </el-header>
@@ -55,7 +68,18 @@ export default {
   data() {
     return {
       // DEBUG: process.env.NODE_ENV !== 'production'
-      isDev: this.$store.state.isDev
+      isDev: this.$store.state.isDev,
+      lang: this.$i18n.locale,
+      langList: [
+        {
+          value: "zh-CN",
+          label: "中文"
+        },
+        {
+          value: "en",
+          label: "en"
+        }
+      ]
     };
   },
   computed: {
@@ -98,6 +122,14 @@ export default {
     // isDev() {
     //   return this.$store.state.isDev;
     // }
+    locale() {
+      switch(this.$i18n.locale) {
+        case 'zh-CN':
+          return '中文'
+        default:
+          return this.$i18n.locale;
+      }
+    }
   },
   mounted() {
     // executed immediately after page is fully loaded
@@ -109,9 +141,19 @@ export default {
           sdk: window.ConfluxJSSDK
         });
       } else {
-        this.$alert('前往安装 <a href="https://portal.conflux-chain.org/" target="_blank">ConfluxPortal</a>', '未检测到 Conflux Portal', {
-          dangerouslyUseHTMLString: true
-        });
+        this.$alert(
+          '前往安装 <a href="https://portal.conflux-chain.org/" target="_blank">ConfluxPortal</a>',
+          "未检测到 Conflux Portal",
+          {
+            dangerouslyUseHTMLString: true,
+            showClose: false,
+            showCancelButton: false,
+            showConfirmButton: false
+          }
+        );
+      }
+      if (localStorage.locale) {
+        this.$i18n.locale = localStorage.locale
       }
     });
   },
@@ -122,21 +164,34 @@ export default {
       }
       if (parseInt(window.conflux.networkVersion) !== 1) {
         console.log(this.networkVersion);
-        this.$alert("请在 Conflux Portal 中切换至测试网, 并手动刷新页面", "网络错误", {
-          showClose: false,
-          showCancelButton: false,
-          showConfirmButton: false,
-          // closeOnClickModal: true,
-          // closeOnPressEscape: true,
-          callBack: () => {}
-        }).catch(() => {
+        this.$alert(
+          this.$t("message.warning.changeNetworkWarning"),
+          this.$t("message.error.networkError"),
+          {
+            showClose: false,
+            showCancelButton: false,
+            showConfirmButton: false,
+            // closeOnClickModal: true,
+            // closeOnPressEscape: true,
+            callBack: () => {}
+          }
+        ).catch(() => {
           // 点击框外触发
           // do nothing
         });
       }
+    },
+    locale(newVal) {
+      localStorage.locale = this.$i18n.locale
     }
   },
   methods: {
+    handleLangCommand(locale) {
+      this.$i18n.locale = locale;
+    },
+    changeLocale() {
+      this.$i18n.locale = this.lang;
+    },
     async authorize() {
       try {
         await this.$store.dispatch("authorize");
@@ -145,17 +200,22 @@ export default {
       }
     },
     processError(err) {
-      this.$alert(err.message, "错误");
+      this.$alert(err.message, his.$t("message.error.error"));
     },
     changeDev() {
       // this.isDev ^= 1
-      this.$store.commit("changeDev")
+      this.$store.commit("changeDev");
     },
     showAccount() {
       this.$alert(
         this.account +
           "<br>" +
-          getScanHtml(this.account, "address", this.networkVersion, "在 ConfluxScan 上查看"),
+          getScanHtml(
+            this.account,
+            "address",
+            this.networkVersion,
+            this.$t("message.toConfluxScan")
+          ),
         "当前账户地址",
         {
           showClose: false,
@@ -222,5 +282,9 @@ body,
 
 .el-card {
   margin: 10px;
+}
+
+.lang-select {
+  background: none;
 }
 </style>
