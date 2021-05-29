@@ -56,18 +56,6 @@ npm run serve
 npm run build
 ```
 
-需要说明的是，如果生成的静态文件将用于部署在二级域名下，则需要修改 `/frontend/vue.config.js` 文件。
-
-```javascript
-// vue.config.js
-module.exports = {
-    configureWebpack: {
-        devtool: 'source-map',
-    },
-    publicPath: './', // 将publicPath变量修改为对应的二级目录路径
-}
-```
-
 ### 部署静态文件
 
 ```
