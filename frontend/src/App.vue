@@ -69,7 +69,7 @@
         :show-close="false"
       >
         <el-row>
-          {{$t('message.tooltip.faucet.portal.beg')}}<el-link href="https://portal.conflux-chain.org/" type="primary" target="_blank">ConfluxPortal<i class="el-icon-top-right el-icon--right"></i></el-link>{{$t('message.tooltip.faucet.portal.end')}}
+          {{$t('message.tooltip.faucet.portal.beg')}}<el-link href="https://portal.confluxnetwork.org/" type="primary" target="_blank">ConfluxPortal<i class="el-icon-top-right el-icon--right"></i></el-link>{{$t('message.tooltip.faucet.portal.end')}}
         </el-row>
       </el-dialog>
 
