@@ -121,7 +121,10 @@
     </el-row>
     <el-row type="flex" justify="center">
       <el-col :span="20">
-        <info-panel></info-panel>
+        <info-panel
+          :faucetAmount="faucetAmount"
+          :faucetInterval="faucetInterval"
+        ></info-panel>
       </el-col>
     </el-row>
     <!-- <el-row type="flex" justify="center" v-if="isDev">
@@ -177,6 +180,8 @@ export default {
 
       faucetCfxBalance: null,
       faucetTokenBalance: null,
+      faucetInterval: null,
+      faucetAmount: null,
 
       isNativeToken: false,
 
@@ -332,7 +337,7 @@ export default {
     },
     faucetContract() {
       if (!this.confluxJS || !this.sdk || !this.conflux) return null;
-
+      if (parseInt(this.networkVersion) !== 1) return null;
       return this.confluxJS.Contract(faucetContractConfig[parseInt(this.networkVersion)]);
     },
     isDev() {
@@ -355,8 +360,13 @@ export default {
       }
     },
     async faucetContract(newVal) {
-      if (newVal !== null) {
+      console.log(newVal)
+      if (newVal) {
         this.faucetCfxBalance = (await this.confluxJS.getBalance(newVal.address)).toString();
+        this.faucetAmount = this.sdk
+          .Drip((await newVal.defaultAmount()).toString())
+          .toCFX();
+        this.faucetInterval = (await newVal.interval()).toString()
       }
     }
   },
