@@ -10,11 +10,20 @@ const messages = {
       selectToken: 'Select Token',
       selectText: "Click or type to select token",
       claim: 'CLAIM',
+      successClaim: 'Successfully claimed the token!',
       connect: 'Connect',
       onRequest: "Requesting...",
       currentAccountAddress: 'Current Account Address',
       toConfluxScan: 'Go to ConfluxScan',
       latestOperationStatus: 'Latest Operation Status',
+      ok: 'OK',
+      token: 'Token',
+      operationType: 'Operation',
+      tokenAmount: 'Amount',
+      transactionHash: 'Transaction Hash',
+      operator: 'Operator',
+      tokenContractAddress: 'Token Address',
+      currentTransactionStatus: 'Current Transaction Status',
       error: {
         networkError: 'Network Error',
         error: "ERROR",
@@ -37,7 +46,8 @@ const messages = {
             beg: "Chrome extension ",
             end: " is required for Conflux Testnet Faucet",
           }
-        }
+        },
+        successClaim: 'Transaction is executed, but not confirmed.'
       }
     },
   },
@@ -52,11 +62,20 @@ const messages = {
         selectToken: '代币选择',
         selectText: "下拉选择或键入搜索",
         claim: '领取',
+        successClaim: '领取成功！',
         connect: '连接钱包',
         onRequest: "请求中...",
         currentAccountAddress: '当前账户地址',
         toConfluxScan: '在 ConfluxScan 上查看',
         latestOperationStatus: '最新操作状态',
+        ok: '确认',
+        token: '代币',
+        operationType: '操作类型',
+        tokenAmount: '代币数',
+        transactionHash: '交易哈希',
+        operator: '操作者',
+        tokenContractAddress: '代币合约地址',
+        currentTransactionStatus: '当前交易状态',
         error: {
           networkError: '网络错误',
           error: "错误",
@@ -79,7 +98,8 @@ const messages = {
               beg: "使用Conflux测试网水龙头需要安装浏览器插件",
               end: "",
             }
-          }
+          },
+          successClaim: '交易已执行，但尚未确认'
         }
       }
   }

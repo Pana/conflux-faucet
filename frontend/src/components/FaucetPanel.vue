@@ -4,7 +4,7 @@
       <el-col :span="20">
         <el-card shadow="hover">
           <el-row>
-            <el-col :span="7">{{$t('message.selectToken')}}</el-col>
+            <el-col :span="7">{{ $t("message.selectToken") }}</el-col>
             <el-col :span="11">
               <el-select
                 v-model="selectedToken"
@@ -26,11 +26,17 @@
               </el-select>
             </el-col>
             <el-col :offset="1" :span="3">
-              <el-tooltip class="item" effect="dark" :content="queryingBalance" placement="bottom-start" :disabled="!isButtonDisabled">
+              <el-tooltip
+                class="item"
+                effect="dark"
+                :content="queryingBalance"
+                placement="bottom-start"
+                :disabled="!isButtonDisabled"
+              >
                 <div>
-                <el-button type="primary" size="mini" :disabled="isButtonDisabled" @click="claim">
-                  {{$t('message.claim')}}
-                </el-button>
+                  <el-button type="primary" size="mini" :disabled="isButtonDisabled" @click="claim">
+                    {{ $t("message.claim") }}
+                  </el-button>
                 </div>
               </el-tooltip>
             </el-col>
@@ -56,7 +62,6 @@
                 </div>
               </el-tooltip>
             </el-col>
-            
           </el-row>
           <el-divider v-if="isDev"></el-divider>
           <el-row type="flex" v-if="isDev">
@@ -85,7 +90,12 @@
               </el-tooltip>
             </el-col>
             <el-col :offset="1" :span="2">
-              <el-input v-model="depositAmount" oninput="value=value.replace(/[^\d]/g,'')" size="mini" :placeholder="defaultDepositAmount">
+              <el-input
+                v-model="depositAmount"
+                oninput="value=value.replace(/[^\d]/g,'')"
+                size="mini"
+                :placeholder="defaultDepositAmount"
+              >
               </el-input>
             </el-col>
             <el-col :span="1" v-if="isDev">
@@ -114,15 +124,28 @@
         <info-panel></info-panel>
       </el-col>
     </el-row>
-    <el-row type="flex" justify="center" v-if="isDev">
+    <!-- <el-row type="flex" justify="center" v-if="isDev">
       <el-col :span="20">
         <history-transaction-panel
           v-bind:transactionList="transactionList"
           v-on:reset-transaction-list="resetTransactionList"
         ></history-transaction-panel>
       </el-col>
-    </el-row>
-    
+    </el-row> -->
+    <el-dialog :visible.sync="executedDialogVisible" :title="$t('message.successClaim')" width="50%" :show-close="false">
+      <el-row>
+        <span>
+          {{$t('message.transactionHash')}}
+          <el-tooltip effect="light" :content="$t('message.tooltip.successClaim')">
+            <i class="header-icon el-icon-info"></i>
+          </el-tooltip>：
+          <el-link :href="scanTransacationUrl" type="primary" target="_blank">{{latestTransactionInfo.hash}} <i class="el-icon-top-right el-icon--right"></i></el-link>
+        </span>
+      </el-row>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="executedDialogVisible = false">{{$t('message.ok')}}</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -130,15 +153,16 @@
 import { config, faucetContractConfig } from "../contracts-config";
 import { TxState, ErrorType } from "../enums";
 import Web3 from "web3";
-import HistoryTransactionPanel from "./HistoryTransactionPanel.vue";
+// import HistoryTransactionPanel from "./HistoryTransactionPanel.vue";
 import CurrentTransactionPanel from "./CurrentTransactionPanel.vue";
-import InfoPanel from './InfoPanel'
+import InfoPanel from "./InfoPanel";
+import { getScanUrl } from '../utils'
 
 export default {
   components: {
     // CsvPanel,
     InfoPanel,
-    HistoryTransactionPanel,
+    // HistoryTransactionPanel,
     CurrentTransactionPanel
   },
   name: "FaucetPanel",
@@ -157,7 +181,7 @@ export default {
       isNativeToken: false,
 
       txState: TxState.NoTask,
-      transactionList: [],
+      // transactionList: [],
       latestTransactionInfo: {
         hash: null,
         selectedToken: null,
@@ -178,12 +202,17 @@ export default {
       tagTheme: "dark",
 
       config: null,
+      executedDialogVisible: false,
       // faucetContract: null,
 
       DEBUG: process.env.NODE_ENV !== "production"
     };
   },
   computed: {
+    scanTransacationUrl() {
+      if(!this.latestTransactionInfo) return ""
+      return getScanUrl(this.latestTransactionInfo.hash, 'transaction', this.networkVersion)
+    },
     account() {
       return this.$store.state.account;
     },
@@ -204,33 +233,41 @@ export default {
     },
     queryingBalance() {
       if (this.isNativeToken) {
-        return this.cfxBalance === null ? this.$t('message.warning.connectionWarning') : this.sdk.Drip(this.cfxBalance).toCFX();
+        return this.cfxBalance === null
+          ? this.$t("message.warning.connectionWarning")
+          : this.sdk.Drip(this.cfxBalance).toCFX();
       }
 
       if (!this.account) {
-        return this.$t('message.warning.connectionWarning');
+        return this.$t("message.warning.connectionWarning");
       }
 
       if (!this.selectedToken) {
-        return this.$t('message.warning.tokenWarning');
+        return this.$t("message.warning.tokenWarning");
       }
 
       // tokenBalance is updated using async function
       // check tokenBalance before presenting value
-      return this.tokenBalance ? this.sdk.Drip(this.tokenBalance).toCFX() : this.$t('message.onRequest');
+      return this.tokenBalance
+        ? this.sdk.Drip(this.tokenBalance).toCFX()
+        : this.$t("message.onRequest");
     },
     queryingFaucetBalance() {
       if (this.isNativeToken) {
-        return this.faucetCfxBalance === null ? this.$t('message.onRequest') : this.sdk.Drip(this.faucetCfxBalance).toCFX();
+        return this.faucetCfxBalance === null
+          ? this.$t("message.onRequest")
+          : this.sdk.Drip(this.faucetCfxBalance).toCFX();
       }
 
       if (!this.selectedToken) {
-        return this.$t('message.warning.tokenWarning');
+        return this.$t("message.warning.tokenWarning");
       }
 
       // tokenBalance is updated using async function
       // check tokenBalance before presenting value
-      return this.faucetTokenBalance ? this.sdk.Drip(this.faucetTokenBalance).toCFX() : this.$t('message.onRequest');
+      return this.faucetTokenBalance
+        ? this.sdk.Drip(this.faucetTokenBalance).toCFX()
+        : this.$t("message.onRequest");
     },
     stateType() {
       switch (this.txState) {
@@ -299,16 +336,16 @@ export default {
       return this.confluxJS.Contract(faucetContractConfig[parseInt(this.networkVersion)]);
     },
     isDev() {
-      return this.$store.state.isDev
+      return this.$store.state.isDev;
     },
     isButtonDisabled() {
-      return !this.isFreeState || !Boolean(this.account) || !Boolean(this.selectedToken)
+      return !this.isFreeState || !Boolean(this.account) || !Boolean(this.selectedToken);
     }
   },
   watch: {
-    transactionList(newVal) {
-      localStorage.faucetTransactionList = JSON.stringify(newVal);
-    },
+    // transactionList(newVal) {
+    //   localStorage.faucetTransactionList = JSON.stringify(newVal);
+    // },
     account(newVal) {
       if (newVal) {
         // 异步操作
@@ -324,9 +361,9 @@ export default {
     }
   },
   mounted() {
-    if (localStorage.faucetTransactionList) {
-      this.transactionList = JSON.parse(localStorage.faucetTransactionList);
-    }
+    // if (localStorage.faucetTransactionList) {
+    //   this.transactionList = JSON.parse(localStorage.faucetTransactionList);
+    // }
 
     // executed immediately after page is fully loaded
     this.$nextTick(function() {
@@ -337,14 +374,20 @@ export default {
     });
   },
   methods: {
+    
     notifyTxState() {
-      this.$notify({
-        title: this.txState,
-        // message: this.stateM,
-        type: this.stateType,
-        offset: 60,
-        duration: 6000
-      });
+      if (this.txState === TxState.Executed && this.latestTransactionHash.isClaim) {
+        this.executedDialogVisible = true;
+      } else {
+          this.$notify({
+          title: this.txState,
+          // message: this.stateM,
+          type: this.stateType,
+          offset: 60,
+          duration: 6000
+        });
+      }
+      
     },
     async authorize() {
       try {
@@ -355,7 +398,7 @@ export default {
       }
     },
     showTxState() {
-      this.$alert(this.stateMessage, "当前交易执行状态", {
+      this.$alert(this.stateMessage, this.$t('message.currentTransactionStatus'), {
         showClose: false,
         showCancelButton: false,
         showConfirmButton: false,
@@ -431,18 +474,19 @@ export default {
     },
     async claim() {
       this.resetLatestTransactionInfo();
-      this.txState = TxState.NoTask
-      
+      this.txState = TxState.NoTask;
       this.errors[ErrorType.TransactionError] = null;
       try {
         // 重新获取授权
         await this.authorize();
 
         let pendingTx;
+        this.latestTransactionInfo.networkVersion = this.networkVersion;
         this.latestTransactionInfo.from = this.account;
         this.latestTransactionInfo.isNativeToken = this.isNativeToken;
         this.latestTransactionInfo.isClaim = true;
         this.latestTransactionInfo.amount = this.sdk
+        
           .Drip((await this.faucetContract.defaultAmount()).toString())
           .toCFX();
 
@@ -494,13 +538,12 @@ export default {
         this.latestTransactionInfo.confirmDate = Date.now();
         // deep copy
         // 执行后立刻加入历史交易列表
-        this.transactionList.push(JSON.parse(JSON.stringify(this.latestTransactionInfo)));
+        // this.transactionList.push(JSON.parse(JSON.stringify(this.latestTransactionInfo)));
 
         await this.$store.dispatch("updateCfxBalance");
         await this.updateTokenBalance();
         await this.updateFaucetCfxBalance();
         await this.updateFaucetTokenBalance();
-
 
         this.notifyTxState();
         receipt = await pendingTx.confirmed();
@@ -519,11 +562,13 @@ export default {
     },
     async deposit() {
       this.resetLatestTransactionInfo();
+      this.txState = TxState.NoTask;
+      this.errors[ErrorType.TransactionError] = null;
       try {
         // 重新获取授权
         await this.authorize();
 
-        const amount = this.depositAmount?this.depositAmount:this.defaultDepositAmount;
+        const amount = this.depositAmount ? this.depositAmount : this.defaultDepositAmount;
 
         let pendingTx;
         this.latestTransactionInfo.networkVersion = this.networkVersion;
@@ -553,7 +598,6 @@ export default {
           this.latestTransactionInfo.selectedToken = this.selectedToken;
           this.latestTransactionInfo.tokenAddress = this.contract.address;
         } else {
-
           pendingTx = this.confluxJS.sendTransaction({
             from: this.account,
             value: this.fromCfxToDrip(amount),
@@ -578,7 +622,7 @@ export default {
         this.latestTransactionInfo.confirmDate = Date.now();
 
         // deep copy
-        this.transactionList.push(JSON.parse(JSON.stringify(this.latestTransactionInfo)));
+        // this.transactionList.push(JSON.parse(JSON.stringify(this.latestTransactionInfo)));
 
         await this.$store.dispatch("updateCfxBalance");
         await this.updateTokenBalance();
@@ -604,7 +648,7 @@ export default {
           this.tokenBalance = null;
           this.$store.commit("resetCfxBalance");
           this.errors[err._type] = err;
-          this.$alert(err.message, this.$t('message.error.error'));
+          this.$alert(err.message, this.$t("message.error.error"));
           break;
         // case ErrorType.CsvError:
         //   this.errors[err._type] = err;
@@ -612,7 +656,7 @@ export default {
         case ErrorType.TransactionError:
           this.errors[err._type] = err;
           this.txState = TxState.Error;
-          this.$alert(err.message, this.$t('message.error.transactionError'));
+          this.$alert(err.message, this.$t("message.error.transactionError"));
           break;
         default:
       }
@@ -623,9 +667,9 @@ export default {
       // this.$store.commit("resetCfxBalance");
       this.tokenBalance = null;
     },
-    resetTransactionList() {
-      this.transactionList = [];
-    },
+    // resetTransactionList() {
+    //   this.transactionList = [];
+    // },
     resetLatestTransactionInfo() {
       this.latestTransactionInfo = {
         hash: null,
@@ -671,5 +715,9 @@ export default {
 
 .el-card {
   margin: 10px;
+}
+
+.success-message {
+  font-size: 20px;
 }
 </style>
