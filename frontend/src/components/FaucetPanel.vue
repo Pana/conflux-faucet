@@ -127,7 +127,7 @@
         ></info-panel>
       </el-col>
     </el-row>
-    <el-dialog :visible.sync="executedDialogVisible" :title="$t('message.successClaim')" width="50%" :show-close="false">
+    <el-dialog :visible.sync="executedDialogVisible" :title="$t('message.successClaim')" width="40%" :show-close="false">
       <el-row>
         <span>
           {{$t('message.transactionHash')}}
@@ -141,6 +141,16 @@
         <el-button type="primary" @click="executedDialogVisible = false">{{$t('message.ok')}}</el-button>
       </span>
     </el-dialog>
+    <el-dialog
+        :visible.sync="txStateDialogVisible"
+        :title="$t('message.currentTransactionStatus')"
+        width="40%"
+        :show-close="false"
+      >
+        <el-row>
+          {{ stateMessage }}
+        </el-row>
+      </el-dialog>
   </div>
 </template>
 
@@ -196,6 +206,7 @@ export default {
 
       config: null,
       executedDialogVisible: false,
+      txStateDialogVisible: false,
 
       DEBUG: process.env.NODE_ENV !== "production"
     };
@@ -388,17 +399,18 @@ export default {
       }
     },
     showTxState() {
-      this.$alert(this.stateMessage, this.$t('message.currentTransactionStatus'), {
-        showClose: false,
-        showCancelButton: false,
-        showConfirmButton: false,
-        closeOnClickModal: true,
-        closeOnPressEscape: true,
-        callBack: () => {}
-      }).catch(() => {
-        // 点击框外触发
-        // do nothing
-      });
+      this.txStateDialogVisible = true
+      // this.$alert(this.stateMessage, this.$t('message.currentTransactionStatus'), {
+      //   showClose: false,
+      //   showCancelButton: false,
+      //   showConfirmButton: false,
+      //   closeOnClickModal: true,
+      //   closeOnPressEscape: true,
+      //   callBack: () => {}
+      // }).catch(() => {
+      //   // 点击框外触发
+      //   // do nothing
+      // });
     },
     async updateTokenBalance() {
       // console.log(this.account)

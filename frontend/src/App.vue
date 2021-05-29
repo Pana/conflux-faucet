@@ -13,6 +13,7 @@
               active-color="#13ce66"
               inactive-text="开发模式"
               @change="changeDev"
+              v-if="isDev"
             >
             </el-switch>
           </el-col>
@@ -49,7 +50,7 @@
       <el-dialog
         :visible.sync="accountDialogVisible"
         :title="$t('message.currentAccountAddress')"
-        width="50%"
+        width="40%"
         :show-close="false"
       >
         <el-row>
@@ -65,7 +66,7 @@
         :visible.sync="installationDialogVisible"
         :title="$t('message.error.installationError')"
         :close-on-click-modal="false"
-        width="50%"
+        width="40%"
         :show-close="false"
       >
         <el-row>
@@ -77,7 +78,7 @@
         :visible.sync="networkDialogVisible"
         :title="$t('message.error.networkError')"
         :close-on-click-modal="false"
-        width="50%"
+        width="40%"
         :show-close="false"
       >
         <el-row>
