@@ -98,8 +98,7 @@
       </el-col>
     </el-row>
 
-    <el-row type="flex" justify="center" v-if="!isFreeState">
-      <!-- <el-row type="flex" justify="center" v-if="hasTask"> -->
+    <el-row type="flex" justify="center" v-if="!isFreeState || latestTransactionInfo.selectedToken">
       <el-col :span="20">
         <current-transaction-panel
           v-bind:latestTransactionInfo="latestTransactionInfo"
@@ -115,7 +114,7 @@
         <info-panel></info-panel>
       </el-col>
     </el-row>
-    <el-row type="flex" justify="center">
+    <el-row type="flex" justify="center" v-if="isDev">
       <el-col :span="20">
         <history-transaction-panel
           v-bind:transactionList="transactionList"
@@ -432,6 +431,9 @@ export default {
     },
     async claim() {
       this.resetLatestTransactionInfo();
+      this.txState = TxState.NoTask
+      
+      this.errors[ErrorType.TransactionError] = null;
       try {
         // 重新获取授权
         await this.authorize();
@@ -503,8 +505,13 @@ export default {
         this.notifyTxState();
         receipt = await pendingTx.confirmed();
 
-        this.txState = TxState.Confirmed;
-        this.notifyTxState();
+        // 用户在executed之后就可以操作了
+        // 如果用户在未确认之前就已经进行了操作，那么当前交易的哈希就会与本次交易不一致，就不再进行状态变更与提示等操作
+        // 否则仍然提示
+        if (this.latestTransactionInfo.hash === receipt.transactionHash) {
+          this.txState = TxState.Confirmed;
+          this.notifyTxState();
+        }
       } catch (err) {
         err._type = ErrorType.TransactionError;
         this.processError(err);

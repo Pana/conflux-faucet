@@ -2,7 +2,7 @@
   <el-card>
     <el-row slot="header">
       <el-col :span="12">
-        <span>最新未执行交易状态</span>
+        <span>{{$t('message.latestOperationStatus')}}</span>
       </el-col>
       <el-col :span="12">
         <el-tag :effect="tagTheme" :type="stateType" @click="$emit('show-tx-state')" style="cursor: pointer" size="mini">{{ txState }}</el-tag>

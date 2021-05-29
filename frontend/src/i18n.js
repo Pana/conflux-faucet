@@ -14,6 +14,7 @@ const messages = {
       onRequest: "Requesting...",
       currentAccountAddress: 'Current Account Address',
       toConfluxScan: 'Go to ConfluxScan',
+      latestOperationStatus: 'Latest Operation Status',
       error: {
         networkError: 'Network Error',
         error: "ERROR",
@@ -29,7 +30,7 @@ const messages = {
         faucet: {
           frequency: {
             beg: 'Conflux Testnet Faucet is available every ',
-            mid: ' for each token. Faucet drips ',
+            mid: ' for each kind of token. Faucet drips ',
             end: ' token for each claim',
           },
           portal: {
@@ -55,6 +56,7 @@ const messages = {
         onRequest: "请求中...",
         currentAccountAddress: '当前账户地址',
         toConfluxScan: '在 ConfluxScan 上查看',
+        latestOperationStatus: '最新操作状态',
         error: {
           networkError: '网络错误',
           error: "错误",
