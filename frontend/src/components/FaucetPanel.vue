@@ -386,7 +386,7 @@ export default {
   methods: {
     
     notifyTxState() {
-      if (this.txState === TxState.Executed && this.latestTransactionHash.isClaim) {
+      if (this.txState === TxState.Executed && this.latestTransactionInfo.isClaim) {
         this.executedDialogVisible = true;
       } else {
           this.$notify({

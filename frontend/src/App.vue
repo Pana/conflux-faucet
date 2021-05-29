@@ -46,6 +46,45 @@
         </el-row>
       </el-header>
 
+      <el-dialog
+        :visible.sync="accountDialogVisible"
+        :title="$t('message.currentAccountAddress')"
+        width="50%"
+        :show-close="false"
+      >
+        <el-row>
+          <span>
+            <el-link :href="scanAccountUrl" type="primary" target="_blank"
+              >{{ account }} <i class="el-icon-top-right el-icon--right"></i
+            ></el-link>
+          </span>
+        </el-row>
+      </el-dialog>
+
+      <el-dialog
+        :visible.sync="installationDialogVisible"
+        :title="$t('message.error.installationError')"
+        :close-on-click-modal="false"
+        width="50%"
+        :show-close="false"
+      >
+        <el-row>
+          {{$t('message.tooltip.faucet.portal.beg')}}<el-link href="https://portal.conflux-chain.org/" type="primary" target="_blank">ConfluxPortal<i class="el-icon-top-right el-icon--right"></i></el-link>{{$t('message.tooltip.faucet.portal.end')}}
+        </el-row>
+      </el-dialog>
+
+      <el-dialog
+        :visible.sync="networkDialogVisible"
+        :title="$t('message.error.networkError')"
+        :close-on-click-modal="false"
+        width="50%"
+        :show-close="false"
+      >
+        <el-row>
+          {{ $t('message.warning.changeNetworkWarning') }}
+        </el-row>
+      </el-dialog>
+
       <el-main class="main-background">
         <faucet-panel></faucet-panel>
       </el-main>
@@ -55,7 +94,7 @@
 
 <script>
 import FaucetPanel from "./components/FaucetPanel.vue";
-import { getScanHtml } from "./utils";
+import { getScanHtml, getScanUrl } from "./utils";
 // import BatchSender from './components/BatchSender.vue';
 
 export default {
@@ -79,10 +118,16 @@ export default {
           value: "en",
           label: "en"
         }
-      ]
+      ],
+      accountDialogVisible: false,
+      installationDialogVisible: false,
+      networkDialogVisible: false
     };
   },
   computed: {
+    scanAccountUrl() {
+      return getScanUrl(this.account, 'address', this.networkVersion)
+    },
     account() {
       return this.$store.state.account;
     },
@@ -123,9 +168,9 @@ export default {
     //   return this.$store.state.isDev;
     // }
     locale() {
-      switch(this.$i18n.locale) {
-        case 'zh-CN':
-          return '中文'
+      switch (this.$i18n.locale) {
+        case "zh-CN":
+          return "中文";
         default:
           return this.$i18n.locale;
       }
@@ -141,19 +186,10 @@ export default {
           sdk: window.ConfluxJSSDK
         });
       } else {
-        this.$alert(
-          '前往安装 <a href="https://portal.conflux-chain.org/" target="_blank">ConfluxPortal</a>',
-          "未检测到 Conflux Portal",
-          {
-            dangerouslyUseHTMLString: true,
-            showClose: false,
-            showCancelButton: false,
-            showConfirmButton: false
-          }
-        );
+        this.installationDialogVisible = true
       }
       if (localStorage.locale) {
-        this.$i18n.locale = localStorage.locale
+        this.$i18n.locale = localStorage.locale;
       }
     });
   },
@@ -164,25 +200,11 @@ export default {
       }
       if (parseInt(window.conflux.networkVersion) !== 1) {
         console.log(this.networkVersion);
-        this.$alert(
-          this.$t("message.warning.changeNetworkWarning"),
-          this.$t("message.error.networkError"),
-          {
-            showClose: false,
-            showCancelButton: false,
-            showConfirmButton: false,
-            // closeOnClickModal: true,
-            // closeOnPressEscape: true,
-            callBack: () => {}
-          }
-        ).catch(() => {
-          // 点击框外触发
-          // do nothing
-        });
+        this.networkDialogVisible = true
       }
     },
     locale(newVal) {
-      localStorage.locale = this.$i18n.locale
+      localStorage.locale = this.$i18n.locale;
     }
   },
   methods: {
@@ -207,29 +229,7 @@ export default {
       this.$store.commit("changeDev");
     },
     showAccount() {
-      this.$alert(
-        this.account +
-          "<br>" +
-          getScanHtml(
-            this.account,
-            "address",
-            this.networkVersion,
-            this.$t("message.toConfluxScan")
-          ),
-        "当前账户地址",
-        {
-          showClose: false,
-          showCancelButton: false,
-          showConfirmButton: false,
-          closeOnClickModal: true,
-          closeOnPressEscape: true,
-          dangerouslyUseHTMLString: true
-          // callBack: ()=>{}
-        }
-      ).catch(() => {
-        // 点击框外触发
-        // do nothing
-      });
+      this.accountDialogVisible = true;
     }
   }
 };

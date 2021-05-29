@@ -27,7 +27,8 @@ const messages = {
       error: {
         networkError: 'Network Error',
         error: "ERROR",
-        transactionError: 'Transaction Error'
+        transactionError: 'Transaction Error',
+        installationError: 'Conflux Portal Not Detected',
       },
       warning: {
         connectionWarning: 'Please connect to your wallet',
@@ -76,10 +77,12 @@ const messages = {
         operator: '操作者',
         tokenContractAddress: '代币合约地址',
         currentTransactionStatus: '当前交易状态',
+        currentAccountAddress: '当前账户地址',
         error: {
           networkError: '网络错误',
           error: "错误",
-          transactionError: '交易执行错误'
+          transactionError: '交易执行错误',
+          installationError: '未检测到 Conflux Portal',
         },
         warning: {
           connectionWarning: '请连接钱包',
