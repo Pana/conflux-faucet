@@ -355,7 +355,7 @@ export default {
       }
     },
     async faucetContract(newVal) {
-      console.log(newVal)
+      // console.log(newVal)
       if (newVal) {
         this.faucetCfxBalance = (await this.confluxJS.getBalance(newVal.address)).toString();
         this.faucetAmount = this.sdk

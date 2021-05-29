@@ -7,22 +7,20 @@ import { default as faucet } from "../../../build/contracts/Faucet.json";
 */
 const options = [
   {
+    address: "cfxtest:achkx35n7vngfxgrm7akemk3ftzy47t61yk5nn270s",
+    label: "FansCoin",
+    contractName: "FC-testnet",
+  },
+  {
+    address: "cfxtest:acab179g4xj369s16ufuaaku2bh6n52wwju2845cda",
+    label: "conflux USDT",
+    contractName: "cUSDT-testnet",
+  },
+  {
     contractName: "GLD", // 唯一标识符，数组内元素该字段不可重复
     label: "GLD - testnet token", // 前端页面会显示此名称
     address: "cfxtest:ace0ea1x6st1spm1jwfces43tder2yewz2vtx8hxrt" // 要求为 CIP-37 格式的测试网地址
   },
-  {
-    contractName: "DMD",
-    label: "DMD - testnet token",
-    address: "cfxtest:type.contract:acg4kb024uwn2cr9682s5ar0yk7zx2vuja20bwrx46",
-    disabled: false
-  },
-  {
-    contractName: "BIGGLD",
-    label: "BIG GLD - testnet token",
-    address: "cfxtest:type.contract:acd29kfdf8wyz41dczw1sj9jua9523047681m9rjfs",
-    disabled: false
-  }
 ];
 
 // 水龙头合约地址

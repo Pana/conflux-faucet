@@ -115,3 +115,4 @@ function setDefaultAmount(uint256 cfxAmount) public onlyManager {
 
 - [ ] 用户自行添加合约
 - [x] ui优化
+- [ ] github flow for deployment
