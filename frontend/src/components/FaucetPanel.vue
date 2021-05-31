@@ -381,7 +381,7 @@ export default {
       if (this.txState === TxState.Executed && this.latestTransactionInfo.isClaim) {
         this.executedDialogVisible = true;
       } else {
-          this.$notify({
+        this.$notify({
           title: this.txState,
           type: this.stateType,
           offset: 60,

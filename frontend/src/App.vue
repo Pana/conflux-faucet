@@ -95,7 +95,7 @@
 
 <script>
 import FaucetPanel from "./components/FaucetPanel.vue";
-import { getScanHtml, getScanUrl } from "./utils";
+import { getScanUrl } from "./utils";
 // import BatchSender from './components/BatchSender.vue';
 
 export default {
@@ -223,7 +223,7 @@ export default {
       }
     },
     processError(err) {
-      this.$alert(err.message, his.$t("message.error.error"));
+      this.$alert(err.message, this.$t("message.error.error"));
     },
     changeDev() {
       // this.isDev ^= 1

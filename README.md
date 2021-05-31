@@ -91,7 +91,7 @@ const faucetAddress = "cfxtest:.........";
 
 ## 编译合约（可选）
 
-之后使用 `cfxtruffle` 编译
+使用 `cfxtruffle` 编译
 
 ```bash
 cfxtruffle compile
