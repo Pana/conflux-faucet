@@ -361,7 +361,7 @@ export default {
         this.faucetAmount = this.sdk
           .Drip((await newVal.defaultAmount()).toString())
           .toCFX();
-        this.faucetInterval = (await newVal.interval()).toString()
+        this.faucetInterval = (await newVal.defaultInterval()).toString()
       }
     }
   },

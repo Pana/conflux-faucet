@@ -12,7 +12,7 @@ const options = [
     contractName: "FC-testnet",
   },
   {
-    address: "cfxtest:acab179g4xj369s16ufuaaku2bh6n52wwju2845cda",
+    address: "cfxtest:acepe88unk7fvs18436178up33hb4zkuf62a9dk1gv",
     label: "conflux USDT",
     contractName: "cUSDT-testnet",
   },
@@ -26,7 +26,7 @@ const options = [
 // 水龙头合约地址
 // 要求为 CIP-37 格式的测试网地址
 // 1 cfx each claim, 120s interval
-const faucetAddress = "cfxtest:acdj471zng0njskpx3cuu7x3hyjnt3cbt66anu0bem";
+const faucetAddress = "cfxtest:ace2v72s12u56d14wv2ma99c2ucv4cne4exmzsrzwz";
 
 let config = {};
 options.forEach(option => {
