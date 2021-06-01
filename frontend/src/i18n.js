@@ -28,7 +28,7 @@ const messages = {
         networkError: 'Network Error',
         error: "ERROR",
         transactionError: 'Transaction Error',
-        installationError: 'Conflux Portal Not Detected',
+        installationError: 'ConfluxPortal Not Detected',
       },
       warning: {
         connectionWarning: 'Please connect to your wallet',
@@ -36,7 +36,7 @@ const messages = {
         changeNetworkWarning: 'Please change network to Conflux Testnet in Conflux Poral, and then manually refresh page',
       },
       tooltip: {
-        networkTooltip: 'Change network in Conflux Portal',
+        networkTooltip: 'Change network in ConfluxPortal',
         faucet: {
           frequency: {
             beg: 'Conflux Testnet Faucet is available every ',
@@ -77,20 +77,19 @@ const messages = {
         operator: '操作者',
         tokenContractAddress: '代币合约地址',
         currentTransactionStatus: '当前交易状态',
-        currentAccountAddress: '当前账户地址',
         error: {
           networkError: '网络错误',
           error: "错误",
           transactionError: '交易执行错误',
-          installationError: '未检测到 Conflux Portal',
+          installationError: '未检测到 ConfluxPortal',
         },
         warning: {
           connectionWarning: '请连接钱包',
           tokenWarning: '请选择Token',
-          changeNetworkWarning: '请在 Conflux Portal 中切换至测试网, 并手动刷新页面',
+          changeNetworkWarning: '请在 ConfluxPortal 中切换至测试网, 并手动刷新页面',
         },
         tooltip: {
-          networkTooltip: '在 Conflux Portal 中切换网络',
+          networkTooltip: '在 ConfluxPortal 中切换网络',
           faucet: {
             frequency: {
               beg: 'Conflux测试网水龙头每 ',

@@ -361,7 +361,7 @@ export default {
         this.faucetAmount = this.sdk
           .Drip((await newVal.defaultAmount()).toString())
           .toCFX();
-        this.faucetInterval = (await newVal.interval()).toString()
+        this.faucetInterval = (await newVal.defaultInterval()).toString()
       }
     }
   },
@@ -381,7 +381,7 @@ export default {
       if (this.txState === TxState.Executed && this.latestTransactionInfo.isClaim) {
         this.executedDialogVisible = true;
       } else {
-          this.$notify({
+        this.$notify({
           title: this.txState,
           type: this.stateType,
           offset: 60,
