@@ -130,7 +130,7 @@ contract Faucet {
         uint256 faucetBalance = IERC20(tokenContractAddress).balanceOf(address(this));
         require(
             faucetBalance >= amount,
-            "No enough cfx in token pool. Please notify the faucet admin"
+            "No enough token in token pool. Please notify the faucet admin"
         );
         lastTokenClaimRecord[tokenContractAddress][msg.sender] = block.timestamp;
         IERC20(tokenContractAddress).transfer(msg.sender, amount - balance);
