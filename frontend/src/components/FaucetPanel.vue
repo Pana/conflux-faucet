@@ -124,33 +124,43 @@
         <info-panel
           :faucetAmount="faucetAmount"
           :faucetInterval="faucetInterval"
+          :selectedToken="selectedToken ? selectedToken : ''"
         ></info-panel>
       </el-col>
     </el-row>
-    <el-dialog :visible.sync="executedDialogVisible" :title="$t('message.successClaim')" width="40%" :show-close="false">
+    <el-dialog
+      :visible.sync="executedDialogVisible"
+      :title="$t('message.successClaim')"
+      width="40%"
+      :show-close="false"
+    >
       <el-row>
         <span>
-          {{$t('message.transactionHash')}}
+          {{ $t("message.transactionHash") }}
           <el-tooltip effect="light" :content="$t('message.tooltip.successClaim')">
-            <i class="header-icon el-icon-info"></i>
-          </el-tooltip>：
-          <el-link :href="scanTransacationUrl" type="primary" target="_blank">{{latestTransactionInfo.hash}} <i class="el-icon-top-right el-icon--right"></i></el-link>
+            <i class="header-icon el-icon-info"></i> </el-tooltip
+          >：
+          <el-link :href="scanTransacationUrl" type="primary" target="_blank"
+            >{{ latestTransactionInfo.hash }} <i class="el-icon-top-right el-icon--right"></i
+          ></el-link>
         </span>
       </el-row>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="executedDialogVisible = false">{{$t('message.ok')}}</el-button>
+        <el-button type="primary" @click="executedDialogVisible = false">{{
+          $t("message.ok")
+        }}</el-button>
       </span>
     </el-dialog>
     <el-dialog
-        :visible.sync="txStateDialogVisible"
-        :title="$t('message.currentTransactionStatus')"
-        width="40%"
-        :show-close="false"
-      >
-        <el-row>
-          {{ stateMessage }}
-        </el-row>
-      </el-dialog>
+      :visible.sync="txStateDialogVisible"
+      :title="$t('message.currentTransactionStatus')"
+      width="40%"
+      :show-close="false"
+    >
+      <el-row>
+        {{ stateMessage }}
+      </el-row>
+    </el-dialog>
   </div>
 </template>
 
@@ -160,7 +170,7 @@ import { TxState, ErrorType } from "../enums";
 import Web3 from "web3";
 import CurrentTransactionPanel from "./CurrentTransactionPanel.vue";
 import InfoPanel from "./InfoPanel";
-import { getScanUrl } from '../utils'
+import { getScanUrl } from "../utils";
 
 export default {
   components: {
@@ -213,8 +223,8 @@ export default {
   },
   computed: {
     scanTransacationUrl() {
-      if(!this.latestTransactionInfo) return ""
-      return getScanUrl(this.latestTransactionInfo.hash, 'transaction', this.networkVersion)
+      if (!this.latestTransactionInfo) return "";
+      return getScanUrl(this.latestTransactionInfo.hash, "transaction", this.networkVersion);
     },
     account() {
       return this.$store.state.account;
@@ -311,12 +321,7 @@ export default {
       return this.$store.state.account !== null;
     },
     options() {
-      const tmp = [
-        {
-          label: "CFX",
-          value: "CFX"
-        }
-      ];
+      const tmp = [];
       if (!config) {
         return tmp;
       }
@@ -357,16 +362,14 @@ export default {
     async faucetContract(newVal) {
       // console.log(newVal)
       if (newVal) {
-        this.faucetCfxBalance = (await this.confluxJS.getBalance(newVal.address)).toString();
-        this.faucetAmount = this.sdk
-          .Drip((await newVal.defaultAmount()).toString())
-          .toCFX();
-        this.faucetInterval = (await newVal.defaultInterval()).toString()
+        // 异步操作 不使用await
+        this.updateFaucetCfxBalance();
+        this.updateFaucetInterval();
+        this.updateFaucetAmount();
       }
     }
   },
   mounted() {
-
     // executed immediately after page is fully loaded
     this.$nextTick(function() {
       this.config = config;
@@ -376,7 +379,6 @@ export default {
     });
   },
   methods: {
-    
     notifyTxState() {
       if (this.txState === TxState.Executed && this.latestTransactionInfo.isClaim) {
         this.executedDialogVisible = true;
@@ -388,7 +390,6 @@ export default {
           duration: 6000
         });
       }
-      
     },
     async authorize() {
       try {
@@ -399,21 +400,9 @@ export default {
       }
     },
     showTxState() {
-      this.txStateDialogVisible = true
-      // this.$alert(this.stateMessage, this.$t('message.currentTransactionStatus'), {
-      //   showClose: false,
-      //   showCancelButton: false,
-      //   showConfirmButton: false,
-      //   closeOnClickModal: true,
-      //   closeOnPressEscape: true,
-      //   callBack: () => {}
-      // }).catch(() => {
-      //   // 点击框外触发
-      //   // do nothing
-      // });
+      this.txStateDialogVisible = true;
     },
     async updateTokenBalance() {
-      // console.log(this.account)
       try {
         if (!this.account || !this.contract) {
           return;
@@ -428,6 +417,28 @@ export default {
         e._type = ErrorType.BalanceError;
         throw e;
       }
+    },
+    async updateFaucetAmount() {
+      this.faucetAmount = "...loading...";
+      let address;
+      if (this.selectedToken == "") {
+        address = config["CFX"].address;
+      } else {
+        address = this.contract.address;
+      }
+      this.faucetAmount = this.sdk
+        .Drip((await this.faucetContract.getClaimAmount(address)).toString())
+        .toCFX();
+    },
+    async updateFaucetInterval() {
+      this.faucetInterval = "...loading...";
+      let address;
+      if (this.selectedToken == "") {
+        address = config["CFX"].address;
+      } else {
+        address = this.contract.address;
+      }
+      this.faucetInterval = (await this.faucetContract.getClaimInterval(address)).toString();
     },
     async updateFaucetCfxBalance() {
       this.faucetCfxBalance = (
@@ -457,13 +468,23 @@ export default {
 
       if (this.selectedToken === "CFX") {
         this.isNativeToken = true;
-        this.contract = null;
+        this.contract = { address: this.config["CFX"].address };
+        // 下面这两个函数是异步函数 但是并不进行阻塞 下面这两个函数影响的变量只与显示有关
+        // 不过相应的 也无法抛出错误了
+        this.updateFaucetInterval();
+        this.updateFaucetAmount();
         return;
       }
       this.isNativeToken = false;
 
       try {
         this.contract = this.confluxJS.Contract(this.config[this.selectedToken]);
+
+        // 下面这两个函数是异步函数 但是并不进行阻塞 下面这两个函数影响的变量只与显示有关
+        // 不过相应的 也无法抛出错误了
+        this.updateFaucetInterval();
+        this.updateFaucetAmount();
+
         // use await to catch error
         await this.updateTokenBalance();
         await this.updateFaucetTokenBalance();
@@ -488,8 +509,7 @@ export default {
         this.latestTransactionInfo.isNativeToken = this.isNativeToken;
         this.latestTransactionInfo.isClaim = true;
         this.latestTransactionInfo.amount = this.sdk
-        
-          .Drip((await this.faucetContract.defaultAmount()).toString())
+          .Drip((await this.faucetContract.getClaimAmount(this.contract.address)).toString())
           .toCFX();
 
         if (!this.isNativeToken) {

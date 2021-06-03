@@ -40,8 +40,8 @@ const messages = {
         faucet: {
           frequency: {
             beg: 'Conflux Testnet Faucet is available every ',
-            mid: ' for each kind of token. Faucet drips ',
-            end: ' token for each claim',
+            mid: ' for {token}. Faucet drips ',
+            end: ' {token} for each claim',
           },
           portal: {
             beg: "Chrome extension ",
@@ -93,8 +93,8 @@ const messages = {
           faucet: {
             frequency: {
               beg: 'Conflux测试网水龙头每 ',
-              mid: ' 可以领取一次，每次可领取 ',
-              end: ' 代币',
+              mid: ' 可以领取一次{token}。每次可领取 ',
+              end: ' {token}',
             },
             portal: {
               beg: "使用Conflux测试网水龙头需要安装浏览器插件",
