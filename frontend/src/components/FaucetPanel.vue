@@ -404,7 +404,7 @@ export default {
     },
     async updateTokenBalance() {
       try {
-        if (!this.account || !this.contract) {
+        if (!this.account || !this.contract || this.isNativeToken) {
           return;
         }
 
@@ -447,7 +447,7 @@ export default {
     },
     async updateFaucetTokenBalance() {
       try {
-        if (!this.contract) {
+        if (!this.contract || this.isNativeToken) {
           return;
         }
 
