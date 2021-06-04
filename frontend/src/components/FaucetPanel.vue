@@ -165,7 +165,7 @@
 </template>
 
 <script>
-import { config, faucetContractConfig } from "../contracts-config";
+import { tokenConfig, faucetContractConfig } from "../contracts-config";
 import { TxState, ErrorType } from "../enums";
 import Web3 from "web3";
 import CurrentTransactionPanel from "./CurrentTransactionPanel.vue";
@@ -214,7 +214,6 @@ export default {
       },
       tagTheme: "dark",
 
-      config: null,
       executedDialogVisible: false,
       txStateDialogVisible: false,
 
@@ -330,16 +329,16 @@ export default {
     },
     options() {
       const tmp = [];
-      if (!config) {
+      if (!tokenConfig) {
         return tmp;
       }
-      Object.keys(config).forEach(option => {
+      Object.keys(tokenConfig).forEach(option => {
         tmp.push({
           value: option,
-          label: config[option].label,
+          label: tokenConfig[option].label,
           // not strict equal
           disabled:
-            this.$store.state.sdk?.address?.decodeCfxAddress(config[option].address)?.netId !=
+            this.$store.state.sdk?.address?.decodeCfxAddress(tokenConfig[option].address)?.netId !=
             this.$store.state.conflux?.networkVersion
         });
       });
@@ -380,9 +379,6 @@ export default {
   mounted() {
     // executed immediately after page is fully loaded
     this.$nextTick(function() {
-      this.config = config;
-      this.faucetContractConfig = faucetContractConfig[1];
-      // this.faucetContract = window.confluxJS.Contract(faucetContractConfig[1]);
       this.web3 = new Web3();
     });
   },
@@ -434,7 +430,7 @@ export default {
       this.faucetAmount = "...loading...";
       let address;
       if (this.selectedToken == "") {
-        address = config["CFX"].address;
+        address = tokenConfig["CFX"].address;
       } else {
         address = this.contract.address;
       }
@@ -446,7 +442,7 @@ export default {
       this.faucetInterval = "...loading...";
       let address;
       if (this.selectedToken == "") {
-        address = config["CFX"].address;
+        address = tokenConfig["CFX"].address;
       } else {
         address = this.contract.address;
       }
@@ -485,7 +481,7 @@ export default {
 
       if (this.selectedToken === "CFX") {
         this.isNativeToken = true;
-        this.contract = { address: this.config["CFX"].address };
+        this.contract = { address: tokenConfig["CFX"].address };
         // 下面这两个函数是异步函数 但是并不进行阻塞 下面这两个函数影响的变量只与显示有关
         // 不过相应的 也无法抛出错误了
         this.updateFaucetInterval();
@@ -495,7 +491,7 @@ export default {
       this.isNativeToken = false;
 
       try {
-        this.contract = this.confluxJS.Contract(this.config[this.selectedToken]);
+        this.contract = this.confluxJS.Contract(tokenConfig[this.selectedToken]);
 
         // 下面这两个函数是异步函数 但是并不进行阻塞 下面这两个函数影响的变量只与显示有关
         // 不过相应的 也无法抛出错误了
