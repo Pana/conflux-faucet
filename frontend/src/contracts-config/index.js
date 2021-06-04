@@ -7,9 +7,13 @@ import { default as faucet } from "../../../build/contracts/Faucet.json";
 */
 const options = [
   {
-    // 这个地址是测试网的零地址，特殊地，在水龙头合约中该地址会被视为CFX的地址
-    // 注意到在dapp中不存在任何操作会将代币合约地址作为 to，因此不会产生发向零地址的交易，使用这个地址是安全的
-    // 最坏的情况是将该合约视为ERC20合约，调用对应的接口，这最多只会产生抛出一个在开发阶段就容易解决的错误
+    /*
+    这个地址是测试网的零地址，特殊地，在 Faucet.sol 中该地址会被视为CFX的地址
+    使用零地址时往往要小心，零地址作为部分交易的 to 参数时，意味着代币的销毁
+    但在水龙头Dapp中，Token合约的地址只被用作水龙头合约部分 claim 的参数
+
+    最坏的情况是该合约被视为ERC20合约，被调用了 ERC20 的相应接口，这最多只会产生抛出一个在开发阶段就容易解决的错误
+    */
     address: "cfxtest:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa6f0vrcsw",
     label: "CFX",
     symbol: "CFX"

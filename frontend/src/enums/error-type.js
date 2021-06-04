@@ -1,6 +1,4 @@
 const ErrorType = {
-  
-  CsvError: "csvError",
   BalanceError: "balanceError",
   TransactionError: "transactionError",
   // 1029, main net address

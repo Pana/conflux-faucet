@@ -245,6 +245,10 @@ export default {
       return this.conflux?.networkVersion;
     },
     queryingBalance() {
+      if (!this.isDev) {
+        return null
+      }
+
       if (this.isNativeToken) {
         return this.cfxBalance === null
           ? this.$t("message.warning.connectionWarning")
@@ -266,6 +270,10 @@ export default {
         : this.$t("message.onRequest");
     },
     queryingFaucetBalance() {
+      if (!this.isDev) {
+        return null
+      }
+
       if (this.isNativeToken) {
         return this.faucetCfxBalance === null
           ? this.$t("message.onRequest")
@@ -403,6 +411,10 @@ export default {
       this.txStateDialogVisible = true;
     },
     async updateTokenBalance() {
+      if (!this.isDev) {
+        return;
+      }
+
       try {
         if (!this.account || !this.contract || this.isNativeToken) {
           return;
@@ -441,11 +453,19 @@ export default {
       this.faucetInterval = (await this.faucetContract.getClaimInterval(address)).toString();
     },
     async updateFaucetCfxBalance() {
+      if (!this.isDev) {
+        return;
+      }
+
       this.faucetCfxBalance = (
         await this.confluxJS.getBalance(this.faucetContract.address)
       ).toString();
     },
     async updateFaucetTokenBalance() {
+      if (!this.isDev) {
+        return null
+      }
+
       try {
         if (!this.contract || this.isNativeToken) {
           return;
@@ -455,9 +475,6 @@ export default {
           await this.contract.balanceOf(this.faucetContract.address)
         ).toString();
         this.faucetTokenBalance = tokenBalance;
-        // console.log("Account tokenBalance: ");
-
-        // console.log(tokenBalance);
       } catch (e) {
         e._type = ErrorType.BalanceError;
         throw e;
@@ -504,49 +521,35 @@ export default {
         await this.authorize();
 
         let pendingTx;
-        this.latestTransactionInfo.networkVersion = this.networkVersion;
-        this.latestTransactionInfo.from = this.account;
-        this.latestTransactionInfo.isNativeToken = this.isNativeToken;
-        this.latestTransactionInfo.isClaim = true;
+        
+        // 这里重新请求一次，面板上显示的值不一定总加载完成了
+        // 再请求一次，这里的值基本可以保证和实际领取的值一致
+        // 代价是不太能感知到的延迟
         this.latestTransactionInfo.amount = this.sdk
           .Drip((await this.faucetContract.getClaimAmount(this.contract.address)).toString())
           .toCFX();
 
-        if (!this.isNativeToken) {
-          const tx = this.faucetContract.claimToken(this.contract.address);
+        const tx = this.faucetContract.claimToken(this.contract.address);
 
-          const estimate = await tx.estimateGasAndCollateral({
-            from: this.account
-          });
-          console.log(estimate);
+        const estimate = await tx.estimateGasAndCollateral({
+          from: this.account
+        });
+        // console.log(estimate);
 
-          pendingTx = tx.sendTransaction({
-            from: this.account,
-            value: 0,
-            gasPrice: 1,
-            gas: estimate.gasLimit
-          });
+        pendingTx = tx.sendTransaction({
+          from: this.account,
+          value: 0,
+          gasPrice: 1,
+          gas: estimate.gasLimit
+        });
 
-          this.latestTransactionInfo.selectedToken = this.selectedToken;
-          this.latestTransactionInfo.tokenAddress = this.contract.address;
-        } else {
-          const tx = this.faucetContract.claimCfx();
-
-          const estimate = await tx.estimateGasAndCollateral({
-            from: this.account
-          });
-          console.log(estimate);
-
-          pendingTx = tx.sendTransaction({
-            from: this.account,
-            value: 0,
-            gasPrice: 1,
-            gas: estimate.gasLimit
-          });
-
-          this.latestTransactionInfo.selectedToken = "CFX";
-          this.latestTransactionInfo.tokenAddress = this.faucetContract.address;
-        }
+        this.latestTransactionInfo.networkVersion = this.networkVersion;
+        this.latestTransactionInfo.from = this.account;
+        this.latestTransactionInfo.isNativeToken = this.isNativeToken;
+        this.latestTransactionInfo.isClaim = true;
+        this.latestTransactionInfo.selectedToken = this.selectedToken;
+        this.latestTransactionInfo.tokenAddress = this.contract.address;
+      
 
         // this step will ask user for authorization
         await pendingTx;
@@ -557,10 +560,8 @@ export default {
         this.latestTransactionInfo.hash = receipt.transactionHash;
         this.txState = TxState.Executed;
 
+        // 时间戳设置为执行完成的时间
         this.latestTransactionInfo.confirmDate = Date.now();
-        // deep copy
-        // 执行后立刻加入历史交易列表
-        // this.transactionList.push(JSON.parse(JSON.stringify(this.latestTransactionInfo)));
 
         await this.$store.dispatch("updateCfxBalance");
         await this.updateTokenBalance();
@@ -582,6 +583,7 @@ export default {
         this.processError(err);
       }
     },
+    // 用于开发模式
     async deposit() {
       this.resetLatestTransactionInfo();
       this.txState = TxState.NoTask;
@@ -593,11 +595,6 @@ export default {
         const amount = this.depositAmount ? this.depositAmount : this.defaultDepositAmount;
 
         let pendingTx;
-        this.latestTransactionInfo.networkVersion = this.networkVersion;
-        this.latestTransactionInfo.from = this.account;
-        this.latestTransactionInfo.isNativeToken = this.isNativeToken;
-        this.latestTransactionInfo.amount = amount;
-        this.latestTransactionInfo.isClaim = false;
 
         if (!this.isNativeToken) {
           const tx = this.contract.transfer(
@@ -616,9 +613,6 @@ export default {
             gasPrice: 1,
             gas: estimate.gasLimit
           });
-
-          this.latestTransactionInfo.selectedToken = this.selectedToken;
-          this.latestTransactionInfo.tokenAddress = this.contract.address;
         } else {
           pendingTx = this.confluxJS.sendTransaction({
             from: this.account,
@@ -627,10 +621,15 @@ export default {
             gasPrice: 1,
             gas: 31000
           });
-
-          this.latestTransactionInfo.selectedToken = "CFX";
-          this.latestTransactionInfo.tokenAddress = this.faucetContract.address;
         }
+
+        this.latestTransactionInfo.networkVersion = this.networkVersion;
+        this.latestTransactionInfo.from = this.account;
+        this.latestTransactionInfo.isNativeToken = this.isNativeToken;
+        this.latestTransactionInfo.amount = amount;
+        this.latestTransactionInfo.isClaim = false;
+        this.latestTransactionInfo.selectedToken = this.selectedToken;
+        this.latestTransactionInfo.tokenAddress = this.contract.address;
 
         // this step will ask user for authorization
         await pendingTx;
@@ -643,8 +642,6 @@ export default {
 
         this.latestTransactionInfo.confirmDate = Date.now();
 
-        // deep copy
-        // this.transactionList.push(JSON.parse(JSON.stringify(this.latestTransactionInfo)));
 
         await this.$store.dispatch("updateCfxBalance");
         await this.updateTokenBalance();
