@@ -1,10 +1,12 @@
 <template>
   <div id="app">
     <el-container style="height: 100%">
-      <el-header style="background: #409EFF">
+      <el-header style="background: #409eff">
         <el-row class="full-height" type="flex" align="middle" justify="left">
           <el-col :span="6">
-            <label class="white-font bold-font">{{ $t("message.title") }}</label>
+            <label class="white-font bold-font">{{
+              $t("message.title")
+            }}</label>
           </el-col>
           <el-col :offset="6" :span="2">
             <el-switch
@@ -18,9 +20,7 @@
             </el-switch>
           </el-col>
           <el-col :offset="1" :span="3">
-            <el-tooltip effect="light" :content="$t('message.tooltip.networkTooltip')">
-              <el-tag>{{ networkText }}</el-tag>
-            </el-tooltip>
+            <el-tag>{{ networkText }}</el-tag>
           </el-col>
 
           <el-col :span="4" v-if="!accountConnected">
@@ -30,13 +30,18 @@
           </el-col>
           <el-col :span="4" v-if="accountConnected">
             <el-button class="full-width" type="success" @click="showAccount">
-              {{ simplifiedAccount }}<i class="el-icon-check el-icon--right"></i>
+              {{ simplifiedAccount
+              }}<i class="el-icon-check el-icon--right"></i>
             </el-button>
           </el-col>
           <el-col :span="2">
             <el-dropdown @command="handleLangCommand" class="full-width">
-              <div class="el-dropdown-link full-width bold-font right-align" style="color: white;">
-                {{ locale }}<i class="el-icon-arrow-down el-icon--right"></i>
+              <div
+                class="el-dropdown-link full-width bold-font right-align"
+                style="color: white"
+              >
+                {{ localeText
+                }}<i class="el-icon-arrow-down el-icon--right"></i>
               </div>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item command="zh-CN">中文</el-dropdown-item>
@@ -70,7 +75,15 @@
         :show-close="false"
       >
         <el-row>
-          {{$t('message.tooltip.faucet.portal.beg')}}<el-link href="https://portal.confluxnetwork.org/" type="primary" target="_blank">ConfluxPortal<i class="el-icon-top-right el-icon--right"></i></el-link>{{$t('message.tooltip.faucet.portal.end')}}
+          {{ $t("message.tooltip.faucet.portal.beg")
+          }}<el-link
+            href="https://portal.confluxnetwork.org/"
+            type="primary"
+            target="_blank"
+            >ConfluxPortal<i
+              class="el-icon-top-right el-icon--right"
+            ></i></el-link
+          >{{ $t("message.tooltip.faucet.portal.end") }}
         </el-row>
       </el-dialog>
 
@@ -82,7 +95,7 @@
         :show-close="false"
       >
         <el-row>
-          {{ $t('message.warning.changeNetworkWarning') }}
+          {{ $t("message.warning.changeNetworkWarning") }}
         </el-row>
       </el-dialog>
 
@@ -100,34 +113,21 @@ import { getScanUrl } from "./utils";
 
 export default {
   components: {
-    // BatchSender
-
-    FaucetPanel
+    FaucetPanel,
   },
   name: "App",
   data() {
     return {
       // DEBUG: process.env.NODE_ENV !== 'production'
       isDev: this.$store.state.isDev,
-      lang: this.$i18n.locale,
-      langList: [
-        {
-          value: "zh-CN",
-          label: "中文"
-        },
-        {
-          value: "en",
-          label: "en"
-        }
-      ],
       accountDialogVisible: false,
       installationDialogVisible: false,
-      networkDialogVisible: false
+      networkDialogVisible: false,
     };
   },
   computed: {
     scanAccountUrl() {
-      return getScanUrl(this.account, 'address', this.networkVersion)
+      return getScanUrl(this.account, "address", this.networkVersion);
     },
     account() {
       return this.$store.state.account;
@@ -168,26 +168,26 @@ export default {
     // isDev() {
     //   return this.$store.state.isDev;
     // }
-    locale() {
+    localeText() {
       switch (this.$i18n.locale) {
         case "zh-CN":
           return "中文";
         default:
           return this.$i18n.locale;
       }
-    }
+    },
   },
   mounted() {
     // executed immediately after page is fully loaded
-    this.$nextTick(function() {
+    this.$nextTick(function () {
       if (typeof window.conflux !== "undefined") {
         this.$store.dispatch("init", {
           conflux: window.conflux,
           confluxJS: window.confluxJS,
-          sdk: window.ConfluxJSSDK
+          sdk: window.ConfluxJSSDK,
         });
       } else {
-        this.installationDialogVisible = true
+        this.installationDialogVisible = true;
       }
       if (localStorage.locale) {
         this.$i18n.locale = localStorage.locale;
@@ -201,19 +201,14 @@ export default {
       }
       if (parseInt(window.conflux.networkVersion) !== 1) {
         console.log(this.networkVersion);
-        this.networkDialogVisible = true
+        this.networkDialogVisible = true;
       }
     },
-    locale(newVal) {
-      localStorage.locale = this.$i18n.locale;
-    }
   },
   methods: {
     handleLangCommand(locale) {
       this.$i18n.locale = locale;
-    },
-    changeLocale() {
-      this.$i18n.locale = this.lang;
+      localStorage.locale = locale;
     },
     async authorize() {
       try {
@@ -231,8 +226,8 @@ export default {
     },
     showAccount() {
       this.accountDialogVisible = true;
-    }
-  }
+    },
+  },
 };
 </script>
 
