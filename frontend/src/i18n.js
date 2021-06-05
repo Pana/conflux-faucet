@@ -53,11 +53,6 @@ const messages = {
       }
     },
   },
-  // ja: {
-  //   message: {
-  //     hello: "こんにちは、世界",
-  //   },
-  // },
   "zh-CN": {
       message:{
         title: "Conflux 测试网水龙头",

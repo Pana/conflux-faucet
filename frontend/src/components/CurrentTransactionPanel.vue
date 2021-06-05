@@ -19,18 +19,7 @@ import TransactionLine from './TransactionLine.vue';
 export default {
   components: { TransactionLine },
   name: 'CurrentTransactionPanel',
-  // confirmDate is left out
   props: ['latestTransactionInfo', 'tagTheme', "stateType", "txState"],
-  data() {
-    return {
-    }
-  },
-  methods: {
-    
-  },
-  computed: {
-    
-  }
 };
 </script>
 

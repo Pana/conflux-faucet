@@ -10,7 +10,6 @@
                 v-model="selectedToken"
                 filterable
                 :placeholder="$t('message.selectText')"
-                @change="changeToken"
                 size="mini"
                 class="full-width"
                 :disabled="!isFreeState"
@@ -131,7 +130,7 @@
     <el-dialog
       :visible.sync="executedDialogVisible"
       :title="$t('message.successClaim')"
-      width="40%"
+      width="45%"
       :show-close="false"
     >
       <el-row>
@@ -154,7 +153,7 @@
     <el-dialog
       :visible.sync="txStateDialogVisible"
       :title="$t('message.currentTransactionStatus')"
-      width="40%"
+      width="45%"
       :show-close="false"
     >
       <el-row class="no-break">
@@ -183,31 +182,43 @@ export default {
       depositAmount: "",
       defaultDepositAmount: "10",
 
-      contract: null,
-      tokenBalance: null,
+      /* this.contract 为当前选择的 token 对应的合约对象
+       this.contract.address 为对应的地址，特殊的，选择CFX时该 address 为 0 地址
+       使用计算属性是比较直观的行为，但是有部分其他计算属性依赖 this.contract，如果使用计算属性可能会造成奇怪的报错
+       因此这里没有将 contract 作为计算属性
 
+       同时，this.contract 的行为较为简单：该变量只会在选择 selectedToken 后更改，不会造成太麻烦的影响
+      */
+      contract: null,
+
+      /*
+       开发模式使用的变量 用于显示当前账户的余额与代币池余额
+      */
+      tokenBalance: null,
       faucetCfxBalance: null,
       faucetTokenBalance: null,
+
+      /*
+        水龙头对应代币但领取间隔和领取量 初始状态会获取CFX对应的取值
+        更改 Token 后会更新
+      */
       faucetInterval: null,
       faucetAmount: null,
 
-      // isNativeToken: false,
-
+      // 标识当前交易的状态
       txState: TxState.NoTask,
       latestTransactionInfo: {
         hash: null,
         selectedToken: null,
         tokenAddress: null,
         chainId: null,
-        confirmDate: null,
+        timestamp: null,
         from: null,
-        // isNativeToken: null,
         isClaim: null,
         amount: null
       },
 
       errors: {
-        csvError: null,
         transactionError: null,
         balanceError: null
       },
@@ -215,8 +226,6 @@ export default {
 
       executedDialogVisible: false,
       txStateDialogVisible: false,
-
-      DEBUG: process.env.NODE_ENV !== "production"
     };
   },
   computed: {
@@ -240,7 +249,6 @@ export default {
       return this.$store.state.cfxBalance;
     },
     chainId() {
-      // return this.conflux?.chainId;
       return this.conflux?.chainId;
     },
     isNativeToken() {
@@ -345,7 +353,6 @@ export default {
             this.$store.state.conflux?.chainId
         });
       });
-      // this.options = tmp;
       return tmp;
     },
     faucetContract() {
@@ -370,19 +377,38 @@ export default {
       }
     },
     async faucetContract(newVal) {
-      // console.log(newVal)
       if (newVal) {
         // 异步操作 不使用await
         this.updateFaucetCfxBalance();
         this.updateFaucetInterval();
         this.updateFaucetAmount();
       }
+    },
+    async selectedToken(newVal) {
+      if (newVal === "CFX") {
+        this.contract = { address: tokenConfig[newVal].address };
+        // 下面这两个函数是异步函数 但是并不进行阻塞 下面这两个函数影响的变量只与显示有关
+        // 不过相应的 也无法抛出错误了
+        this.updateFaucetInterval();
+        this.updateFaucetAmount();
+        return;
+      }
+
+      try {
+        this.contract = this.confluxJS.Contract(tokenConfig[newVal]);
+
+        // 下面这两个函数是异步函数 但是并不进行阻塞 下面这两个函数影响的变量只与显示有关
+        // 不过相应的 也无法抛出错误了
+        this.updateFaucetInterval();
+        this.updateFaucetAmount();
+
+        // use await to catch error
+        await this.updateTokenBalance();
+        await this.updateFaucetTokenBalance();
+      } catch (e) {
+        this.processError(e);
+      }
     }
-  },
-  mounted() {
-    // executed immediately after page is fully loaded
-    this.$nextTick(function() {
-    });
   },
   methods: {
     notifyTxState() {
@@ -420,9 +446,6 @@ export default {
 
         const tokenBalance = (await this.contract.balanceOf(this.account)).toString();
         this.tokenBalance = tokenBalance;
-        console.log("Account tokenBalance: ");
-
-        console.log(tokenBalance);
       } catch (e) {
         e._type = ErrorType.BalanceError;
         throw e;
@@ -432,6 +455,7 @@ export default {
       this.faucetAmount = "...loading...";
       let address;
       if (this.selectedToken == "") {
+        // 未选择 Token 时查询 CFX 的 amount
         address = tokenConfig["CFX"].address;
       } else {
         address = this.contract.address;
@@ -444,6 +468,7 @@ export default {
       this.faucetInterval = "...loading...";
       let address;
       if (this.selectedToken == "") {
+        // 未选择 Token 时查询 CFX 的 interval
         address = tokenConfig["CFX"].address;
       } else {
         address = this.contract.address;
@@ -478,35 +503,6 @@ export default {
         throw e;
       }
     },
-    async changeToken() {
-      console.log("Selected token changed to %s", this.selectedToken);
-
-      if (this.selectedToken === "CFX") {
-        // this.isNativeToken = true;
-        this.contract = { address: tokenConfig["CFX"].address };
-        // 下面这两个函数是异步函数 但是并不进行阻塞 下面这两个函数影响的变量只与显示有关
-        // 不过相应的 也无法抛出错误了
-        this.updateFaucetInterval();
-        this.updateFaucetAmount();
-        return;
-      }
-      // this.isNativeToken = false;
-
-      try {
-        this.contract = this.confluxJS.Contract(tokenConfig[this.selectedToken]);
-
-        // 下面这两个函数是异步函数 但是并不进行阻塞 下面这两个函数影响的变量只与显示有关
-        // 不过相应的 也无法抛出错误了
-        this.updateFaucetInterval();
-        this.updateFaucetAmount();
-
-        // use await to catch error
-        await this.updateTokenBalance();
-        await this.updateFaucetTokenBalance();
-      } catch (e) {
-        this.processError(e);
-      }
-    },
     fromCfxToDrip(cfx) {
       return this.sdk.Drip.fromCFX(cfx);
     },
@@ -532,7 +528,6 @@ export default {
         const estimate = await tx.estimateGasAndCollateral({
           from: this.account
         });
-        // console.log(estimate);
 
         pendingTx = tx.sendTransaction({
           from: this.account,
@@ -543,7 +538,6 @@ export default {
 
         this.latestTransactionInfo.chainId = this.chainId;
         this.latestTransactionInfo.from = this.account;
-        // this.latestTransactionInfo.isNativeToken = this.isNativeToken;
         this.latestTransactionInfo.isClaim = true;
         this.latestTransactionInfo.selectedToken = this.selectedToken;
         this.latestTransactionInfo.tokenAddress = this.contract.address;
@@ -559,7 +553,7 @@ export default {
         this.txState = TxState.Executed;
 
         // 时间戳设置为执行完成的时间
-        this.latestTransactionInfo.confirmDate = Date.now();
+        this.latestTransactionInfo.timestamp = Date.now();
 
         await this.$store.dispatch("updateCfxBalance");
         await this.updateTokenBalance();
@@ -603,7 +597,6 @@ export default {
           const estimate = await tx.estimateGasAndCollateral({
             from: this.account
           });
-          console.log(estimate);
 
           pendingTx = tx.sendTransaction({
             from: this.account,
@@ -623,7 +616,6 @@ export default {
 
         this.latestTransactionInfo.chainId = this.chainId;
         this.latestTransactionInfo.from = this.account;
-        // this.latestTransactionInfo.isNativeToken = this.isNativeToken;
         this.latestTransactionInfo.amount = amount;
         this.latestTransactionInfo.isClaim = false;
         this.latestTransactionInfo.selectedToken = this.selectedToken;
@@ -638,7 +630,7 @@ export default {
         this.latestTransactionInfo.hash = receipt.transactionHash;
         this.txState = TxState.Executed;
 
-        this.latestTransactionInfo.confirmDate = Date.now();
+        this.latestTransactionInfo.timestamp = Date.now();
 
 
         await this.$store.dispatch("updateCfxBalance");
@@ -659,7 +651,7 @@ export default {
     processError(err) {
       console.log(err);
       console.log(err._type);
-      // balanceError csvError transactionError
+      // balanceError transactionError
       switch (err._type) {
         case ErrorType.BalanceError:
           this.tokenBalance = null;
@@ -674,11 +666,9 @@ export default {
           break;
         default:
       }
-      // console.log(this.errors)
     },
 
     resetBalance() {
-      // this.$store.commit("resetCfxBalance");
       this.tokenBalance = null;
     },
     resetLatestTransactionInfo() {
@@ -687,9 +677,8 @@ export default {
         selectedToken: null,
         tokenAddress: null,
         chainId: null,
-        confirmDate: null,
+        timestamp: null,
         from: null,
-        // isNativeToken: null,
         isClaim: null,
         amount: null
       };
@@ -699,36 +688,4 @@ export default {
 </script>
 
 <style scoped>
-.full-height {
-  height: 100%;
-  /* align: middle; */
-}
-
-.full-width {
-  width: 100%;
-}
-
-.right-align {
-  text-align: right;
-}
-
-.center-align {
-  text-align: center;
-}
-
-.bold-font {
-  font-weight: bold;
-}
-
-.white-font {
-  color: white;
-}
-
-.el-card {
-  margin: 10px;
-}
-
-.success-message {
-  font-size: 20px;
-}
 </style>

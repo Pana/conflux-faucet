@@ -55,7 +55,7 @@
       <el-dialog
         :visible.sync="accountDialogVisible"
         :title="$t('message.currentAccountAddress')"
-        width="40%"
+        width="45%"
         :show-close="false"
       >
         <el-row>
@@ -71,7 +71,7 @@
         :visible.sync="installationDialogVisible"
         :title="$t('message.error.installationError')"
         :close-on-click-modal="false"
-        width="40%"
+        width="45%"
         :show-close="false"
       >
         <el-row>
@@ -91,7 +91,7 @@
         :visible.sync="networkDialogVisible"
         :title="$t('message.error.networkError')"
         :close-on-click-modal="false"
-        width="40%"
+        width="45%"
         :show-close="false"
       >
         <el-row class="no-break">
@@ -214,16 +214,19 @@ export default {
         this.networkWarning = this.$t("message.warning.changeNetworkWarning")
       } else {
         // Portal 加载时 给出加载的提示
+        // 也有可能是使用了自行搭建的测试网 不过这里不作区分
         this.networkWarning = this.$t("message.warning.networkLoadingWarning")
       }
 
     },
   },
   methods: {
+    // 选择语言选项时触发的函数
     handleLangCommand(locale) {
       this.$i18n.locale = locale;
       localStorage.locale = locale;
     },
+    // 调用 store，变量的管理由store进行（包括account，balance）
     async authorize() {
       try {
         await this.$store.dispatch("authorize");
