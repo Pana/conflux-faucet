@@ -67,7 +67,12 @@ contract Faucet {
         defaultAmount = cfxAmount * 1e18;
     }
 
-    // set interval / amount to 0 means using default setting
+    /**
+    @param tokenContractAddress 代币地址。如果传入0地址代表设置的是CFX
+    @param interval 领取的间隔 单位为秒
+    @param amountForDecimals 设置每次领取Token的整数部分，与decimals 一起使用，领取额度为 amountForDecimals * (10^decimals)
+    @param decimals 设置每次领取 Token 的数位，与 amountForDecimals 一起使用，领取额度为 amountForDecimals * (10^decimals)
+     */
     function setClaimSetting(address tokenContractAddress, uint256 interval, uint256 amountForDecimals, uint256 decimals) public onlyManager {
         tokenClaimSettings[tokenContractAddress].interval = interval;
         tokenClaimSettings[tokenContractAddress].amount = amountForDecimals * (10**decimals);
