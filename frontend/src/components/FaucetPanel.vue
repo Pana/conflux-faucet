@@ -199,7 +199,7 @@ export default {
         hash: null,
         selectedToken: null,
         tokenAddress: null,
-        networkVersion: null,
+        chainId: null,
         confirmDate: null,
         from: null,
         isNativeToken: null,
@@ -223,7 +223,7 @@ export default {
   computed: {
     scanTransacationUrl() {
       if (!this.latestTransactionInfo) return "";
-      return getScanUrl(this.latestTransactionInfo.hash, "transaction", this.networkVersion);
+      return getScanUrl(this.latestTransactionInfo.hash, "transaction", this.chainId);
     },
     account() {
       return this.$store.state.account;
@@ -240,8 +240,9 @@ export default {
     cfxBalance() {
       return this.$store.state.cfxBalance;
     },
-    networkVersion() {
-      return this.conflux?.networkVersion;
+    chainId() {
+      // return this.conflux?.chainId;
+      return this.conflux?.chainId;
     },
     queryingBalance() {
       if (!this.isDev) {
@@ -339,7 +340,7 @@ export default {
           // not strict equal
           disabled:
             this.$store.state.sdk?.address?.decodeCfxAddress(tokenConfig[option].address)?.netId !=
-            this.$store.state.conflux?.networkVersion
+            this.$store.state.conflux?.chainId
         });
       });
       // this.options = tmp;
@@ -347,8 +348,8 @@ export default {
     },
     faucetContract() {
       if (!this.confluxJS || !this.sdk || !this.conflux) return null;
-      if (parseInt(this.networkVersion) !== 1) return null;
-      return this.confluxJS.Contract(faucetContractConfig[parseInt(this.networkVersion)]);
+      if (parseInt(this.chainId) !== 1) return null;
+      return this.confluxJS.Contract(faucetContractConfig[parseInt(this.chainId)]);
     },
     isDev() {
       return this.$store.state.isDev;
@@ -539,7 +540,7 @@ export default {
           gas: estimate.gasLimit
         });
 
-        this.latestTransactionInfo.networkVersion = this.networkVersion;
+        this.latestTransactionInfo.chainId = this.chainId;
         this.latestTransactionInfo.from = this.account;
         this.latestTransactionInfo.isNativeToken = this.isNativeToken;
         this.latestTransactionInfo.isClaim = true;
@@ -619,7 +620,7 @@ export default {
           });
         }
 
-        this.latestTransactionInfo.networkVersion = this.networkVersion;
+        this.latestTransactionInfo.chainId = this.chainId;
         this.latestTransactionInfo.from = this.account;
         this.latestTransactionInfo.isNativeToken = this.isNativeToken;
         this.latestTransactionInfo.amount = amount;
@@ -684,7 +685,7 @@ export default {
         hash: null,
         selectedToken: null,
         tokenAddress: null,
-        networkVersion: null,
+        chainId: null,
         confirmDate: null,
         from: null,
         isNativeToken: null,

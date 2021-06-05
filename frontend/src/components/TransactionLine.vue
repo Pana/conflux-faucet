@@ -51,8 +51,8 @@ export default {
     tokenAddress() {
       return this.transactionInfo.tokenAddress
     },
-    networkVersion() {
-      return this.transactionInfo.networkVersion
+    chainId() {
+      return this.transactionInfo.chainId
     },
     from() {
       return this.transactionInfo.from
@@ -75,13 +75,13 @@ export default {
       return date.toJSON().substr(0, 19).replace('T', ' ');
     },
     scanTransacationUrl() {
-      return getScanUrl(this.hash, 'transaction', this.networkVersion)
+      return getScanUrl(this.hash, 'transaction', this.chainId)
     },
     scanContractUrl() {
-      return getScanUrl(this.tokenAddress, 'address', this.networkVersion)
+      return getScanUrl(this.tokenAddress, 'address', this.chainId)
     },
     scanFromUrl() {
-      return getScanUrl(this.from, 'address', this.networkVersion)
+      return getScanUrl(this.from, 'address', this.chainId)
     }
   },
 };

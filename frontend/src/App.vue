@@ -95,7 +95,7 @@
         :show-close="false"
       >
         <el-row>
-          {{ $t("message.warning.changeNetworkWarning") }}
+          {{ networkWarning }}
         </el-row>
       </el-dialog>
 
@@ -109,7 +109,6 @@
 <script>
 import FaucetPanel from "./components/FaucetPanel.vue";
 import { getScanUrl } from "./utils";
-// import BatchSender from './components/BatchSender.vue';
 
 export default {
   components: {
@@ -118,16 +117,16 @@ export default {
   name: "App",
   data() {
     return {
-      // DEBUG: process.env.NODE_ENV !== 'production'
       isDev: this.$store.state.isDev,
       accountDialogVisible: false,
       installationDialogVisible: false,
       networkDialogVisible: false,
+      networkWarning: "",
     };
   },
   computed: {
     scanAccountUrl() {
-      return getScanUrl(this.account, "address", this.networkVersion);
+      return getScanUrl(this.account, "address", this.chainId);
     },
     account() {
       return this.$store.state.account;
@@ -145,19 +144,19 @@ export default {
       return this.$store.state.cfxBalance;
     },
     networkText() {
-      switch (this.conflux?.networkVersion) {
-        case "1029":
+      switch (this.conflux?.chainId) {
+        case '0x405':
           return "Conflux Tethys";
-        case "1":
+        case '0x1':
           return "Conflux Testnet";
         case undefined:
           return "Portal Not Detected";
       }
 
-      return "networkId: " + this.conflux?.networkVersion;
+      return "networkId: " + this.conflux?.chainId;
     },
-    networkVersion() {
-      return this.conflux?.networkVersion;
+    chainId() {
+      return this.conflux?.chainId;
     },
     simplifiedAccount() {
       return this.$store.getters.simplifiedAccount;
@@ -179,6 +178,8 @@ export default {
   },
   mounted() {
     // executed immediately after page is fully loaded
+    // 如果监测到ConfluxPortal，会挂载ConfluxPortal注入的变量
+    // 挂载后会监听 accountChanged 事件
     this.$nextTick(function () {
       if (typeof window.conflux !== "undefined") {
         this.$store.dispatch("init", {
@@ -187,22 +188,35 @@ export default {
           sdk: window.ConfluxJSSDK,
         });
       } else {
+        // 没有检测到 ConfluxPortal 注入的变量时会弹出窗口提示安装
+        // 且该窗口无法关闭
         this.installationDialogVisible = true;
       }
+
+      // 读取本地化信息
       if (localStorage.locale) {
         this.$i18n.locale = localStorage.locale;
       }
     });
   },
   watch: {
-    networkVersion(newVal) {
-      if (newVal === undefined) {
+    // conflux.chainId 是异步加载的 这里需要监听该变量的状态
+    chainId(newVal) {
+      if (newVal === undefined ||  newVal === 1) {
+        this.networkWarning = ""
+        this.networkDialogVisible = false;
         return;
       }
-      if (parseInt(window.conflux.networkVersion) !== 1) {
-        console.log(this.networkVersion);
-        this.networkDialogVisible = true;
+
+      this.networkDialogVisible = true;
+      // 当 Id 为主网 Id 的时候
+      if (parseInt(newVal) === 1029) {
+        this.networkWarning = this.$t("message.warning.changeNetworkWarning")
+      } else {
+        // Portal 加载时 给出加载的提示
+        this.networkWarning = this.$t("message.warning.networkLoadingWarning")
       }
+
     },
   },
   methods: {
@@ -221,7 +235,6 @@ export default {
       this.$alert(err.message, this.$t("message.error.error"));
     },
     changeDev() {
-      // this.isDev ^= 1
       this.$store.commit("changeDev");
     },
     showAccount() {
@@ -247,13 +260,11 @@ body,
 }
 
 .main-background {
-  /* background: #E4E7ED; */
   background: #ebeef5;
 }
 
 .full-height {
   height: 100%;
-  /* align: middle; */
 }
 
 .full-width {

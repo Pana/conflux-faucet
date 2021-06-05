@@ -34,6 +34,7 @@ const messages = {
         connectionWarning: 'Please connect to your wallet',
         tokenWarning: 'Please select token',
         changeNetworkWarning: 'Please change network to Conflux Testnet in Conflux Poral, and then manually refresh page',
+        networkLoadingWarning: 'Network status is on loading，please check in ConfluxPortal'
       },
       tooltip: {
         networkTooltip: 'Change network in ConfluxPortal',
@@ -87,6 +88,7 @@ const messages = {
           connectionWarning: '请连接钱包',
           tokenWarning: '请选择Token',
           changeNetworkWarning: '请在 ConfluxPortal 中切换至测试网, 并手动刷新页面',
+          networkLoadingWarning: '当前网络情况仍在加载中，请在 ConfluxPortal 中确认当前网络情况'
         },
         tooltip: {
           networkTooltip: '在 ConfluxPortal 中切换网络',
