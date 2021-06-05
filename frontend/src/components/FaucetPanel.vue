@@ -167,7 +167,6 @@
 <script>
 import { tokenConfig, faucetContractConfig } from "../contracts-config";
 import { TxState, ErrorType } from "../enums";
-import Web3 from "web3";
 import CurrentTransactionPanel from "./CurrentTransactionPanel.vue";
 import InfoPanel from "./InfoPanel";
 import { getScanUrl } from "../utils";
@@ -383,7 +382,6 @@ export default {
   mounted() {
     // executed immediately after page is fully loaded
     this.$nextTick(function() {
-      this.web3 = new Web3();
     });
   },
   methods: {
