@@ -58,7 +58,7 @@ export default {
       return this.transactionInfo.from
     },
     isNativeToken() {
-      return this.transactionInfo.isNativeToken
+      return this.transactionInfo.selectedToken === "CFX"
     },
     isClaim() {
       return this.transactionInfo.isClaim

@@ -94,7 +94,7 @@
         width="40%"
         :show-close="false"
       >
-        <el-row>
+        <el-row class="no-break">
           {{ networkWarning }}
         </el-row>
       </el-dialog>
@@ -202,7 +202,7 @@ export default {
   watch: {
     // conflux.chainId 是异步加载的 这里需要监听该变量的状态
     chainId(newVal) {
-      if (newVal === undefined ||  newVal === 1) {
+      if (newVal === undefined ||  newVal === "0x1") {
         this.networkWarning = ""
         this.networkDialogVisible = false;
         return;
@@ -210,7 +210,7 @@ export default {
 
       this.networkDialogVisible = true;
       // 当 Id 为主网 Id 的时候
-      if (parseInt(newVal) === 1029) {
+      if (newVal === '0x405') {
         this.networkWarning = this.$t("message.warning.changeNetworkWarning")
       } else {
         // Portal 加载时 给出加载的提示
@@ -293,5 +293,9 @@ body,
 
 .lang-select {
   background: none;
+}
+
+.no-break {
+  word-break: normal;
 }
 </style>

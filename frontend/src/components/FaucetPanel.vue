@@ -157,7 +157,7 @@
       width="40%"
       :show-close="false"
     >
-      <el-row>
+      <el-row class="no-break">
         {{ stateMessage }}
       </el-row>
     </el-dialog>
@@ -192,7 +192,7 @@ export default {
       faucetInterval: null,
       faucetAmount: null,
 
-      isNativeToken: false,
+      // isNativeToken: false,
 
       txState: TxState.NoTask,
       latestTransactionInfo: {
@@ -202,7 +202,7 @@ export default {
         chainId: null,
         confirmDate: null,
         from: null,
-        isNativeToken: null,
+        // isNativeToken: null,
         isClaim: null,
         amount: null
       },
@@ -243,6 +243,9 @@ export default {
     chainId() {
       // return this.conflux?.chainId;
       return this.conflux?.chainId;
+    },
+    isNativeToken() {
+      return this.selectedToken === "CFX";
     },
     queryingBalance() {
       if (!this.isDev) {
@@ -481,7 +484,7 @@ export default {
       console.log("Selected token changed to %s", this.selectedToken);
 
       if (this.selectedToken === "CFX") {
-        this.isNativeToken = true;
+        // this.isNativeToken = true;
         this.contract = { address: tokenConfig["CFX"].address };
         // 下面这两个函数是异步函数 但是并不进行阻塞 下面这两个函数影响的变量只与显示有关
         // 不过相应的 也无法抛出错误了
@@ -489,7 +492,7 @@ export default {
         this.updateFaucetAmount();
         return;
       }
-      this.isNativeToken = false;
+      // this.isNativeToken = false;
 
       try {
         this.contract = this.confluxJS.Contract(tokenConfig[this.selectedToken]);
@@ -542,7 +545,7 @@ export default {
 
         this.latestTransactionInfo.chainId = this.chainId;
         this.latestTransactionInfo.from = this.account;
-        this.latestTransactionInfo.isNativeToken = this.isNativeToken;
+        // this.latestTransactionInfo.isNativeToken = this.isNativeToken;
         this.latestTransactionInfo.isClaim = true;
         this.latestTransactionInfo.selectedToken = this.selectedToken;
         this.latestTransactionInfo.tokenAddress = this.contract.address;
@@ -622,7 +625,7 @@ export default {
 
         this.latestTransactionInfo.chainId = this.chainId;
         this.latestTransactionInfo.from = this.account;
-        this.latestTransactionInfo.isNativeToken = this.isNativeToken;
+        // this.latestTransactionInfo.isNativeToken = this.isNativeToken;
         this.latestTransactionInfo.amount = amount;
         this.latestTransactionInfo.isClaim = false;
         this.latestTransactionInfo.selectedToken = this.selectedToken;
@@ -688,7 +691,7 @@ export default {
         chainId: null,
         confirmDate: null,
         from: null,
-        isNativeToken: null,
+        // isNativeToken: null,
         isClaim: null,
         amount: null
       };
