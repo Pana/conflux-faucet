@@ -1,4 +1,4 @@
-import { default as ERC20 } from "../../../build/contracts/IERC20.json";
+import { abi } from "../../../build/contracts/IERC20.json";
 
 /*
  options 数组中为支持的代币
@@ -38,7 +38,7 @@ const options = [
 /**
   tokenConfig[symbol] = {
     abi,
-    bytecode,
+    // bytecode,
     address,
     label
   }
@@ -46,8 +46,8 @@ const options = [
 let tokenConfig = {};
 options.forEach(option => {
   tokenConfig[option.symbol] = {
-    abi: ERC20.abi,
-    bytecode: ERC20.bytecode,
+    abi,
+    // bytecode: ERC20.bytecode,
     address: option.address,
     label: option.label,
   };
