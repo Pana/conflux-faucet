@@ -43,6 +43,17 @@ contract Faucet {
         _manager = newManager;
     }
 
+    // manager 可以将合约中的代币提取出来，在销毁合约时调用此方法
+    function retrieveToken(address [] memory tokenList) public onlyManager {
+        for(uint i = 0; i < tokenList.length; i += 1) {
+            if (tokenList[i] != address(0)) {
+                IERC20(tokenList[i]).transfer(msg.sender, IERC20(tokenList[i]).balanceOf(address(this)));
+            } else {
+                msg.sender.transfer(address(this).balance);
+            }
+        }
+    }
+
     function getClaimInterval(address tokenContractAddress) public view returns (uint256) {
         uint256 claimInterval = tokenClaimSettings[tokenContractAddress].interval;
         if (claimInterval != 0) {
@@ -63,37 +74,19 @@ contract Faucet {
         defaultInterval = intervalSeconds;
     }
 
-    function setDefaultAmount(uint256 cfxAmount) public onlyManager {
-        defaultAmount = cfxAmount * 1e18;
+    // 设置默认领取 Token 的数量 注意该数是未考虑 decimals 的数，因此一般需要设置为一个大数
+    function setDefaultAmount(uint256 amount) public onlyManager {
+        defaultAmount = amount;
     }
 
     /**
     @param tokenContractAddress 代币地址。如果传入0地址代表设置的是CFX
     @param interval 领取的间隔 单位为秒
-    @param amountForDecimals 设置每次领取Token的整数部分，与decimals 一起使用，领取额度为 amountForDecimals * (10^decimals)
-    @param decimals 设置每次领取 Token 的数位，与 amountForDecimals 一起使用，领取额度为 amountForDecimals * (10^decimals)
+    @param amount 设置每次领取 Token 的数量 注意该数是未考虑 decimals 的数，因此一般需要设置为一个大数
      */
-    function setClaimSetting(address tokenContractAddress, uint256 interval, uint256 amountForDecimals, uint256 decimals) public onlyManager {
+    function setClaimSetting(address tokenContractAddress, uint256 interval, uint256 amount) public onlyManager {
         tokenClaimSettings[tokenContractAddress].interval = interval;
-        tokenClaimSettings[tokenContractAddress].amount = amountForDecimals * (10**decimals);
-    }
-
-    function nextCfxClaim() public view returns (uint256) {
-        return nextTokenClaim(address(0));
-    }
-
-    function nextTokenClaim(address tokenContractAddress)
-        public
-        view
-        returns (uint256)
-    {
-        uint256 lastTs = lastTokenClaimRecord[tokenContractAddress][msg.sender];
-        uint256 interval = getClaimInterval(tokenContractAddress);
-        if (lastTs == 0 || block.timestamp - lastTs < interval) {
-            return 0;
-        } else {
-            return block.timestamp - lastTs - interval;
-        }
+        tokenClaimSettings[tokenContractAddress].amount = amount;
     }
 
     function claimToken(address tokenContractAddress) public {

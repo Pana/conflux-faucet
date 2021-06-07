@@ -14,6 +14,7 @@
   - [修改水龙头合约配置](#修改水龙头合约配置)
     - [设置默认领取额度与最小领取间隔时间](#设置默认领取额度与最小领取间隔时间)
     - [对某种 Token 的领取额度与最小领取间隔时间进行配置](#对某种-token-的领取额度与最小领取间隔时间进行配置)
+  - [更新日志](#更新日志)
   - [TODOS](#todos)
 
 ## 项目主体结构
@@ -28,6 +29,10 @@
 安装依赖
 
 ```bash
+npm install
+
+cd ./frontend
+
 npm install
 ```
 
@@ -124,8 +129,9 @@ function setDefaultIntervalSeconds(uint256 intervalSeconds) public onlyManager {
     defaultInterval = intervalSeconds;
 }
 
-function setDefaultAmount(uint256 cfxAmount) public onlyManager {
-    defaultAmount = cfxAmount * 1e18;
+// 设置默认领取 Token 的数量 注意该数是未考虑 decimals 的数，因此一般需要设置为一个大数
+function setDefaultAmount(uint256 amount) public onlyManager {
+    defaultAmount = amount;
 }
 ```
 
@@ -135,16 +141,19 @@ function setDefaultAmount(uint256 cfxAmount) public onlyManager {
 
 ```solidity
 /**
-  @param tokenContractAddress 代币合约地址。如果传入0地址代表设置的是CFX
-  @param interval 领取的间隔 单位为秒
-  @param amountForDecimals 设置每次领取 Token 的整数部分，与decimals 一起使用，领取额度为 amountForDecimals * (10^decimals)
-  @param decimals 设置每次领取 Token 的数位，与 amountForDecimals 一起使用，领取额度为 amountForDecimals * (10^decimals)
-*/
-function setClaimSetting(address tokenContractAddress, uint256 interval, uint256 amountForDecimals, uint256 decimals) public onlyManager {
+@param tokenContractAddress 代币地址。如果传入0地址代表设置的是CFX
+@param interval 领取的间隔 单位为秒
+@param amount 设置每次领取 Token 的数量 注意该数是未考虑 decimals 的数，因此一般需要设置为一个大数
+  */
+function setClaimSetting(address tokenContractAddress, uint256 interval, uint256 amount) public onlyManager {
     tokenClaimSettings[tokenContractAddress].interval = interval;
-    tokenClaimSettings[tokenContractAddress].amount = amountForDecimals * (10**decimals);
+    tokenClaimSettings[tokenContractAddress].amount = amount;
 }
 ```
+
+## 更新日志
+
+2021/06/07 正式版1.0.0
 
 ## TODOS
 

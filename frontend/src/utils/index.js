@@ -3,9 +3,7 @@ const mainNetUrl = "https://confluxscan.io"
 
 const prefixMap = {
   1: testNetUrl,
-  '1': testNetUrl,
   1029: mainNetUrl,
-  '1029': mainNetUrl
 }
 
 /**
