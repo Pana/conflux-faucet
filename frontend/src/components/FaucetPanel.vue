@@ -28,7 +28,7 @@
               <el-tooltip
                 class="item"
                 effect="dark"
-                :content="queryingBalance"
+                :content="claimWarning"
                 placement="bottom-start"
                 :disabled="!isButtonDisabled"
               >
@@ -253,6 +253,17 @@ export default {
     },
     isNativeToken() {
       return this.selectedToken === "CFX";
+    },
+    claimWarning() {
+      if (!this.account) {
+        return this.$t("message.warning.connectionWarning");
+      }
+
+      if (!this.selectedToken) {
+        return this.$t("message.warning.tokenWarning");
+      }
+
+      return null
     },
     queryingBalance() {
       if (!this.isDev) {

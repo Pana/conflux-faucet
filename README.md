@@ -153,6 +153,7 @@ function setClaimSetting(address tokenContractAddress, uint256 interval, uint256
 
 ## 更新日志
 
+2021/06/07 1.0.1 修复生产模式下claim按钮处无提示的bug
 2021/06/07 正式版1.0.0
 
 ## TODOS
