@@ -368,43 +368,44 @@ export default {
     }
   },
   watch: {
-    account(newVal) {
+    async account(newVal) {
       if (newVal) {
-        // 异步操作
-        this.updateTokenBalance();
+        await this.updateTokenBalance();
       } else {
         this.resetBalance();
       }
     },
     async faucetContract(newVal) {
       if (newVal) {
-        // 异步操作 不使用await
-        this.updateFaucetCfxBalance();
-        this.updateFaucetInterval();
-        this.updateFaucetAmount();
+        await Promise.all([
+          this.updateFaucetCfxBalance(),
+          this.updateFaucetInterval(),
+          this.updateFaucetAmount(),
+        ]);
       }
     },
     async selectedToken(newVal) {
       if (newVal === "CFX") {
         this.contract = { address: tokenConfig[newVal].address };
-        // 下面这两个函数是异步函数 但是并不进行阻塞 下面这两个函数影响的变量只与显示有关
-        // 不过相应的 也无法抛出错误了
-        this.updateFaucetInterval();
-        this.updateFaucetAmount();
+        await Promise.all([
+          this.updateFaucetInterval(),
+          this.updateFaucetAmount()
+        ])
         return;
       }
 
       try {
         this.contract = this.confluxJS.Contract(tokenConfig[newVal]);
 
-        // 下面这两个函数是异步函数 但是并不进行阻塞 下面这两个函数影响的变量只与显示有关
-        // 不过相应的 也无法抛出错误了
         this.updateFaucetInterval();
         this.updateFaucetAmount();
 
-        // use await to catch error
-        await this.updateTokenBalance();
-        await this.updateFaucetTokenBalance();
+        await Promise.all([
+          this.updateFaucetInterval(),
+          this.updateFaucetAmount(),
+          this.updateTokenBalance(),
+          this.updateFaucetTokenBalance()
+        ])
       } catch (e) {
         this.processError(e);
       }
@@ -555,10 +556,12 @@ export default {
         // 时间戳设置为执行完成的时间
         this.latestTransactionInfo.timestamp = Date.now();
 
-        await this.$store.dispatch("updateCfxBalance");
-        await this.updateTokenBalance();
-        await this.updateFaucetCfxBalance();
-        await this.updateFaucetTokenBalance();
+        await Promise.all([
+          this.$store.dispatch("updateCfxBalance"),
+          this.updateTokenBalance(),
+          this.updateFaucetCfxBalance(),
+          this.updateFaucetTokenBalance(),
+        ])
 
         this.notifyTxState();
         receipt = await pendingTx.confirmed();
@@ -632,11 +635,12 @@ export default {
 
         this.latestTransactionInfo.timestamp = Date.now();
 
-
-        await this.$store.dispatch("updateCfxBalance");
-        await this.updateTokenBalance();
-        await this.updateFaucetCfxBalance();
-        await this.updateFaucetTokenBalance();
+        await Promise.all([
+          this.$store.dispatch("updateCfxBalance"),
+          this.updateTokenBalance(),
+          this.updateFaucetCfxBalance(),
+          this.updateFaucetTokenBalance(),
+        ])
 
         this.notifyTxState();
         receipt = await pendingTx.confirmed();
