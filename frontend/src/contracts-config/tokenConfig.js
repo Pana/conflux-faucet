@@ -28,11 +28,6 @@ const options = [
     label: "conflux USDT",
     symbol: "cUSDT",
   },
-  {
-    symbol: "GLD", // 唯一标识符，数组内元素该字段不可重复，会在信息面板显示
-    label: "GLD - testnet token", // 前端页面会显示此名称
-    address: "cfxtest:ace0ea1x6st1spm1jwfces43tder2yewz2vtx8hxrt" // 要求为 CIP-37 格式的测试网地址
-  },
 ];
 
 /**
