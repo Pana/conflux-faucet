@@ -34,14 +34,15 @@ const messages = {
         connectionWarning: 'Please connect to your wallet',
         tokenWarning: 'Please select token',
         changeNetworkWarning: 'Please change network to Conflux Testnet in Conflux Poral, and then manually refresh page',
+        networkLoadingWarning: 'Network status is on loading or unofficial network is in use，please check it in ConfluxPortal'
       },
       tooltip: {
         networkTooltip: 'Change network in ConfluxPortal',
         faucet: {
           frequency: {
             beg: 'Conflux Testnet Faucet is available every ',
-            mid: ' for each kind of token. Faucet drips ',
-            end: ' token for each claim',
+            mid: ' for {token}. Faucet drips ',
+            end: ' {token} for each claim',
           },
           portal: {
             beg: "Chrome extension ",
@@ -52,11 +53,6 @@ const messages = {
       }
     },
   },
-  // ja: {
-  //   message: {
-  //     hello: "こんにちは、世界",
-  //   },
-  // },
   "zh-CN": {
       message:{
         title: "Conflux 测试网水龙头",
@@ -87,14 +83,15 @@ const messages = {
           connectionWarning: '请连接钱包',
           tokenWarning: '请选择Token',
           changeNetworkWarning: '请在 ConfluxPortal 中切换至测试网, 并手动刷新页面',
+          networkLoadingWarning: '当前网络情况仍在加载中或使用了非官方的测试网络，请在 ConfluxPortal 中确认当前网络情况'
         },
         tooltip: {
           networkTooltip: '在 ConfluxPortal 中切换网络',
           faucet: {
             frequency: {
               beg: 'Conflux测试网水龙头每 ',
-              mid: ' 可以领取一次，每次可领取 ',
-              end: ' 代币',
+              mid: ' 可以领取一次{token}。每次可领取 ',
+              end: ' {token}',
             },
             portal: {
               beg: "使用Conflux测试网水龙头需要安装浏览器插件",

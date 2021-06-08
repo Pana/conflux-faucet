@@ -1,10 +1,12 @@
 <template>
   <div id="app">
     <el-container style="height: 100%">
-      <el-header style="background: #409EFF">
+      <el-header style="background: #409eff">
         <el-row class="full-height" type="flex" align="middle" justify="left">
           <el-col :span="6">
-            <label class="white-font bold-font">{{ $t("message.title") }}</label>
+            <label class="white-font bold-font">{{
+              $t("message.title")
+            }}</label>
           </el-col>
           <el-col :offset="6" :span="2">
             <el-switch
@@ -18,9 +20,7 @@
             </el-switch>
           </el-col>
           <el-col :offset="1" :span="3">
-            <el-tooltip effect="light" :content="$t('message.tooltip.networkTooltip')">
-              <el-tag>{{ networkText }}</el-tag>
-            </el-tooltip>
+            <el-tag>{{ networkText }}</el-tag>
           </el-col>
 
           <el-col :span="4" v-if="!accountConnected">
@@ -30,13 +30,18 @@
           </el-col>
           <el-col :span="4" v-if="accountConnected">
             <el-button class="full-width" type="success" @click="showAccount">
-              {{ simplifiedAccount }}<i class="el-icon-check el-icon--right"></i>
+              {{ simplifiedAccount
+              }}<i class="el-icon-check el-icon--right"></i>
             </el-button>
           </el-col>
           <el-col :span="2">
             <el-dropdown @command="handleLangCommand" class="full-width">
-              <div class="el-dropdown-link full-width bold-font right-align" style="color: white;">
-                {{ locale }}<i class="el-icon-arrow-down el-icon--right"></i>
+              <div
+                class="el-dropdown-link full-width bold-font right-align"
+                style="color: white"
+              >
+                {{ localeText
+                }}<i class="el-icon-arrow-down el-icon--right"></i>
               </div>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item command="zh-CN">中文</el-dropdown-item>
@@ -50,7 +55,7 @@
       <el-dialog
         :visible.sync="accountDialogVisible"
         :title="$t('message.currentAccountAddress')"
-        width="40%"
+        width="45%"
         :show-close="false"
       >
         <el-row>
@@ -66,11 +71,19 @@
         :visible.sync="installationDialogVisible"
         :title="$t('message.error.installationError')"
         :close-on-click-modal="false"
-        width="40%"
+        width="45%"
         :show-close="false"
       >
         <el-row>
-          {{$t('message.tooltip.faucet.portal.beg')}}<el-link href="https://portal.confluxnetwork.org/" type="primary" target="_blank">ConfluxPortal<i class="el-icon-top-right el-icon--right"></i></el-link>{{$t('message.tooltip.faucet.portal.end')}}
+          {{ $t("message.tooltip.faucet.portal.beg")
+          }}<el-link
+            href="https://portal.confluxnetwork.org/"
+            type="primary"
+            target="_blank"
+            >ConfluxPortal<i
+              class="el-icon-top-right el-icon--right"
+            ></i></el-link
+          >{{ $t("message.tooltip.faucet.portal.end") }}
         </el-row>
       </el-dialog>
 
@@ -78,11 +91,11 @@
         :visible.sync="networkDialogVisible"
         :title="$t('message.error.networkError')"
         :close-on-click-modal="false"
-        width="40%"
+        width="45%"
         :show-close="false"
       >
-        <el-row>
-          {{ $t('message.warning.changeNetworkWarning') }}
+        <el-row class="no-break">
+          {{ networkWarning }}
         </el-row>
       </el-dialog>
 
@@ -96,38 +109,24 @@
 <script>
 import FaucetPanel from "./components/FaucetPanel.vue";
 import { getScanUrl } from "./utils";
-// import BatchSender from './components/BatchSender.vue';
 
 export default {
   components: {
-    // BatchSender
-
-    FaucetPanel
+    FaucetPanel,
   },
   name: "App",
   data() {
     return {
-      // DEBUG: process.env.NODE_ENV !== 'production'
       isDev: this.$store.state.isDev,
-      lang: this.$i18n.locale,
-      langList: [
-        {
-          value: "zh-CN",
-          label: "中文"
-        },
-        {
-          value: "en",
-          label: "en"
-        }
-      ],
       accountDialogVisible: false,
       installationDialogVisible: false,
-      networkDialogVisible: false
+      networkDialogVisible: false,
+      networkWarning: "",
     };
   },
   computed: {
     scanAccountUrl() {
-      return getScanUrl(this.account, 'address', this.networkVersion)
+      return getScanUrl(this.account, "address", this.chainId);
     },
     account() {
       return this.$store.state.account;
@@ -145,19 +144,19 @@ export default {
       return this.$store.state.cfxBalance;
     },
     networkText() {
-      switch (this.conflux?.networkVersion) {
-        case "1029":
+      switch (this.conflux?.chainId) {
+        case '0x405':
           return "Conflux Tethys";
-        case "1":
+        case '0x1':
           return "Conflux Testnet";
         case undefined:
           return "Portal Not Detected";
       }
 
-      return "networkId: " + this.conflux?.networkVersion;
+      return "networkId: " + this.conflux?.chainId;
     },
-    networkVersion() {
-      return this.conflux?.networkVersion;
+    chainId() {
+      return this.conflux?.chainId;
     },
     simplifiedAccount() {
       return this.$store.getters.simplifiedAccount;
@@ -168,53 +167,66 @@ export default {
     // isDev() {
     //   return this.$store.state.isDev;
     // }
-    locale() {
+    localeText() {
       switch (this.$i18n.locale) {
         case "zh-CN":
           return "中文";
         default:
           return this.$i18n.locale;
       }
-    }
+    },
   },
   mounted() {
     // executed immediately after page is fully loaded
-    this.$nextTick(function() {
+    // 如果监测到ConfluxPortal，会挂载ConfluxPortal注入的变量
+    // 挂载后会监听 accountChanged 事件
+    this.$nextTick(function () {
       if (typeof window.conflux !== "undefined") {
         this.$store.dispatch("init", {
           conflux: window.conflux,
           confluxJS: window.confluxJS,
-          sdk: window.ConfluxJSSDK
+          sdk: window.ConfluxJSSDK,
         });
       } else {
-        this.installationDialogVisible = true
+        // 没有检测到 ConfluxPortal 注入的变量时会弹出窗口提示安装
+        // 且该窗口无法关闭
+        this.installationDialogVisible = true;
       }
+
+      // 读取本地化信息
       if (localStorage.locale) {
         this.$i18n.locale = localStorage.locale;
       }
     });
   },
   watch: {
-    networkVersion(newVal) {
-      if (newVal === undefined) {
+    // conflux.chainId 是异步加载的 这里需要监听该变量的状态
+    chainId(newVal) {
+      if (newVal === undefined ||  newVal === "0x1") {
+        this.networkWarning = ""
+        this.networkDialogVisible = false;
         return;
       }
-      if (parseInt(window.conflux.networkVersion) !== 1) {
-        console.log(this.networkVersion);
-        this.networkDialogVisible = true
+
+      this.networkDialogVisible = true;
+      // 当 Id 为主网 Id 的时候
+      if (newVal === '0x405') {
+        this.networkWarning = this.$t("message.warning.changeNetworkWarning")
+      } else {
+        // Portal 加载时 给出加载的提示
+        // 也有可能是使用了自行搭建的测试网 不过这里不作区分
+        this.networkWarning = this.$t("message.warning.networkLoadingWarning")
       }
+
     },
-    locale(newVal) {
-      localStorage.locale = this.$i18n.locale;
-    }
   },
   methods: {
+    // 选择语言选项时触发的函数
     handleLangCommand(locale) {
       this.$i18n.locale = locale;
+      localStorage.locale = locale;
     },
-    changeLocale() {
-      this.$i18n.locale = this.lang;
-    },
+    // 调用 store，变量的管理由store进行（包括account，balance）
     async authorize() {
       try {
         await this.$store.dispatch("authorize");
@@ -226,13 +238,12 @@ export default {
       this.$alert(err.message, this.$t("message.error.error"));
     },
     changeDev() {
-      // this.isDev ^= 1
       this.$store.commit("changeDev");
     },
     showAccount() {
       this.accountDialogVisible = true;
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -252,13 +263,11 @@ body,
 }
 
 .main-background {
-  /* background: #E4E7ED; */
   background: #ebeef5;
 }
 
 .full-height {
   height: 100%;
-  /* align: middle; */
 }
 
 .full-width {
@@ -287,5 +296,9 @@ body,
 
 .lang-select {
   background: none;
+}
+
+.no-break {
+  word-break: normal;
 }
 </style>

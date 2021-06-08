@@ -6,10 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Faucet {
     // lastTokenClaimRecord[tokenContractAddress][msg.sender] = lastClaimTimestamp
+    // 特殊地，0地址视为CFX的地址
     mapping(address => mapping(address => uint256)) lastTokenClaimRecord;
-
-    // 可以使用0地址作为cfx代币的地址，这样不需要多声明一个变量，但暂时先不作更改
-    mapping(address => uint256) lastCfxClaimRecord;
 
     struct ClaimSetting {
         uint256 amount;
@@ -17,22 +15,17 @@ contract Faucet {
     }
 
     // 每类代币的interval和amount可以单独设置
-    // 默认设置为CFX的设置(之后可能会将0地址视为cfx代币的地址，但当前没有)
-    // 当前不允许单独设置CFX但领取间隔和时间，但是可以通过修改默认值来进行变更
+    // 特殊地，0地址视为CFX的地址
     mapping(address => ClaimSetting) tokenClaimSettings;
 
-    // 两次领取的间隔
+    // 两次领取的默认最小间隔 与 默认领取token的数量
+    // 当 tokenClaimSetting 中对应值为 0 时（即未设置） 会调用默认值
     uint256 public defaultInterval = 3600 seconds;
-
-    // 更改默认Claim token的数量
     uint256 public defaultAmount = 1000 * 1e18;
 
     address internal _manager;
 
-    // constructor(uint _interval, uint256 _defaultAmount) public {
     constructor() public {
-        // defaultInterval = _interval;
-        // defaultAmount = _defaultAmount;
         _manager = msg.sender;
         SponsorWhitelistControl cpc =
             SponsorWhitelistControl(0x0888000000000000000000000000000000000001);
@@ -50,7 +43,17 @@ contract Faucet {
         _manager = newManager;
     }
 
-    // for public call
+    // manager 可以将合约中的代币提取出来，在销毁合约时调用此方法
+    function retrieveToken(address [] memory tokenList) public onlyManager {
+        for(uint i = 0; i < tokenList.length; i += 1) {
+            if (tokenList[i] != address(0)) {
+                IERC20(tokenList[i]).transfer(msg.sender, IERC20(tokenList[i]).balanceOf(address(this)));
+            } else {
+                msg.sender.transfer(address(this).balance);
+            }
+        }
+    }
+
     function getClaimInterval(address tokenContractAddress) public view returns (uint256) {
         uint256 claimInterval = tokenClaimSettings[tokenContractAddress].interval;
         if (claimInterval != 0) {
@@ -59,7 +62,6 @@ contract Faucet {
         return defaultInterval;
     }
 
-    // for public call
     function getClaimAmount(address tokenContractAddress) public view returns (uint256) {
         uint256 claimAmount = tokenClaimSettings[tokenContractAddress].amount;
         if (claimAmount != 0) {
@@ -72,38 +74,19 @@ contract Faucet {
         defaultInterval = intervalSeconds;
     }
 
-    function setDefaultAmount(uint256 cfxAmount) public onlyManager {
-        
-        defaultAmount = cfxAmount * 1e18;
+    // 设置默认领取 Token 的数量 注意该数是未考虑 decimals 的数，因此一般需要设置为一个大数
+    function setDefaultAmount(uint256 amount) public onlyManager {
+        defaultAmount = amount;
     }
 
-    // set to 0 means using default setting
-    function setClaimSetting(address tokenContractAddress, uint256 interval, uint256 amountForDecimals, uint256 decimals) public onlyManager {
+    /**
+    @param tokenContractAddress 代币地址。如果传入0地址代表设置的是CFX
+    @param interval 领取的间隔 单位为秒
+    @param amount 设置每次领取 Token 的数量 注意该数是未考虑 decimals 的数，因此一般需要设置为一个大数
+     */
+    function setClaimSetting(address tokenContractAddress, uint256 interval, uint256 amount) public onlyManager {
         tokenClaimSettings[tokenContractAddress].interval = interval;
-        tokenClaimSettings[tokenContractAddress].amount = amountForDecimals * (10**decimals);
-    }
-
-    function nextCfxClaim() public view returns (uint256) {
-        uint256 lastTs = lastCfxClaimRecord[msg.sender];
-        if (lastTs == 0 || block.timestamp - lastTs < defaultInterval) {
-            return 0;
-        } else {
-            return block.timestamp - lastTs - defaultInterval;
-        }
-    }
-
-    function nextTokenClaim(address tokenContractAddress)
-        public
-        view
-        returns (uint256)
-    {
-        uint256 lastTs = lastTokenClaimRecord[tokenContractAddress][msg.sender];
-        uint256 interval = getClaimInterval(tokenContractAddress);
-        if (lastTs == 0 || block.timestamp - lastTs < interval) {
-            return 0;
-        } else {
-            return block.timestamp - lastTs - interval;
-        }
+        tokenClaimSettings[tokenContractAddress].amount = amount;
     }
 
     function claimToken(address tokenContractAddress) public {
@@ -115,55 +98,65 @@ contract Faucet {
             block.timestamp - lastTs > interval,
             "Claim Interval too short"
         );
+
         lastTokenClaimRecord[tokenContractAddress][msg.sender] = block.timestamp;
+        if (tokenContractAddress == address(0)) {
+            require(
+                address(this).balance >= amount,
+                "There is no enough CFX in the faucet. Please notify the faucet admin"
+            );
+            msg.sender.transfer(amount);
+            return;
+        }
+        require(
+            IERC20(tokenContractAddress).balanceOf(address(this)) >= amount,
+            "There is no enough token in the faucet. Please notify the faucet admin"
+        );
         IERC20(tokenContractAddress).transfer(msg.sender, amount);
+    }
+
+    // 这个接口依然保留
+    function claimCfx() public {
+        return claimToken(address(0));
     }
 
     function claimTokenRegardingSenderBalance(address tokenContractAddress) public {
         uint256 amount = getClaimAmount(tokenContractAddress);
-        uint256 balance = IERC20(tokenContractAddress).balanceOf(msg.sender);
-        require(
-            balance < amount,
-            "There is enoungh token balance in sender's wallet"
-        );
 
-        uint256 faucetBalance = IERC20(tokenContractAddress).balanceOf(address(this));
-        require(
-            faucetBalance >= amount,
-            "No enough token in token pool. Please notify the faucet admin"
-        );
+        if (tokenContractAddress == address(0)) {
+            require(
+                msg.sender.balance < amount,
+                "There is enoungh CFX in sender's wallet"
+            );
+            lastTokenClaimRecord[tokenContractAddress][msg.sender] = block.timestamp;
+
+            // will revert if there is no enough cfx balance
+            require(
+                address(this).balance >= amount,
+                "No enough CFX in token pool. Please notify the faucet admin"
+            );
+            msg.sender.transfer(amount - msg.sender.balance);
+        } else {
+            uint256 balance = IERC20(tokenContractAddress).balanceOf(msg.sender);
+            require(
+                balance < amount,
+                "There is enoungh token balance in sender's wallet"
+            );
+
+            uint256 faucetBalance = IERC20(tokenContractAddress).balanceOf(address(this));
+            require(
+                faucetBalance >= amount,
+                "No enough token in token pool. Please notify the faucet admin"
+            );
+            IERC20(tokenContractAddress).transfer(msg.sender, amount - balance);
+        }
+
         lastTokenClaimRecord[tokenContractAddress][msg.sender] = block.timestamp;
-        IERC20(tokenContractAddress).transfer(msg.sender, amount - balance);
     }
 
-    function claimCfx() public payable {
-        uint256 lastTs = lastCfxClaimRecord[msg.sender];
-        require(
-            block.timestamp - lastTs > defaultInterval,
-            "Claim Interval too short"
-        );
-        lastCfxClaimRecord[msg.sender] = block.timestamp;
-        
-        // will revert if there is no enough cfx balance
-        require(
-            address(this).balance >= defaultAmount,
-            "No enough cfx in token pool. Please notify the faucet admin"
-        );
-        msg.sender.transfer(defaultAmount);
-    }
-
-    function claimCfxRegardingSenderBalance() public payable {
-        require(
-            msg.sender.balance < defaultAmount,
-            "There is enoungh CFX balance in sender's wallet"
-        );
-        lastCfxClaimRecord[msg.sender] = block.timestamp;
-        // will revert if there is no enough cfx balance
-        require(
-            address(this).balance >= defaultAmount,
-            "No enough cfx in token pool. Please notify the faucet admin"
-        );
-        msg.sender.transfer(defaultAmount - msg.sender.balance);
+    // 接口仍然保留
+    function claimCfxRegardingSenderBalance() public {
+        return claimTokenRegardingSenderBalance(address(0));
     }
 
     // 接受CFX转账时触发

@@ -1,6 +1,5 @@
 <template>
   <el-collapse-item>
-    <!-- <template slot="title"> -->
       <el-row type="flex" slot="title" class="full-width">
         <el-col :span="4">
           <div>{{$t('message.token')}}: {{selectedToken}}</div>
@@ -42,8 +41,8 @@ export default {
     hash() {
       return this.transactionInfo.hash
     },
-    confirmDate() {
-      return this.transactionInfo.confirmDate
+    timestamp() {
+      return this.transactionInfo.timestamp
     },
     selectedToken() {
       return this.transactionInfo.selectedToken
@@ -51,14 +50,14 @@ export default {
     tokenAddress() {
       return this.transactionInfo.tokenAddress
     },
-    networkVersion() {
-      return this.transactionInfo.networkVersion
+    chainId() {
+      return this.transactionInfo.chainId
     },
     from() {
       return this.transactionInfo.from
     },
     isNativeToken() {
-      return this.transactionInfo.isNativeToken
+      return this.transactionInfo.selectedToken === "CFX"
     },
     isClaim() {
       return this.transactionInfo.isClaim
@@ -70,18 +69,18 @@ export default {
       // +UTC8 -480
       const tzOffset = new Date().getTimezoneOffset()
 
-      if (!this.confirmDate) return ""
-      var date = new Date(this.confirmDate - tzOffset * 60 * 1000); // 对应时区调整显示时间
+      if (!this.timestamp) return ""
+      var date = new Date(this.timestamp - tzOffset * 60 * 1000); // 对应时区调整显示时间，但没有在其他时区进行过测试
       return date.toJSON().substr(0, 19).replace('T', ' ');
     },
     scanTransacationUrl() {
-      return getScanUrl(this.hash, 'transaction', this.networkVersion)
+      return getScanUrl(this.hash, 'transaction', this.chainId)
     },
     scanContractUrl() {
-      return getScanUrl(this.tokenAddress, 'address', this.networkVersion)
+      return getScanUrl(this.tokenAddress, 'address', this.chainId)
     },
     scanFromUrl() {
-      return getScanUrl(this.from, 'address', this.networkVersion)
+      return getScanUrl(this.from, 'address', this.chainId)
     }
   },
 };
