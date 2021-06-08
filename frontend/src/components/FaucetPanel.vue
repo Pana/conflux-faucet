@@ -408,9 +408,6 @@ export default {
       try {
         this.contract = this.confluxJS.Contract(tokenConfig[newVal]);
 
-        this.updateFaucetInterval();
-        this.updateFaucetAmount();
-
         await Promise.all([
           this.updateFaucetInterval(),
           this.updateFaucetAmount(),
