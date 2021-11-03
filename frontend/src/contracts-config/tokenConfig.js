@@ -14,20 +14,21 @@ const options = [
 
     最坏的情况是该合约被视为ERC20合约，被调用了 ERC20 的相应接口，这最多只会产生抛出一个在开发阶段就容易解决的错误
     */
-    address: "cfxtest:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa6f0vrcsw",
+    // address: "NET8888:TYPE.CONTRACT:ACG2V19UETGZ4NCNUZFD09XS1HWZ2B66CYMVEZ8ZUS",
+    address: 'cfx:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa0sfbnjm2',
     label: "CFX",
     symbol: "CFX"
   },
-  {
-    address: "cfxtest:achkx35n7vngfxgrm7akemk3ftzy47t61yk5nn270s",
-    label: "FansCoin",
-    symbol: "FC",
-  },
-  {
-    address: "cfxtest:acepe88unk7fvs18436178up33hb4zkuf62a9dk1gv",
-    label: "conflux USDT",
-    symbol: "cUSDT",
-  },
+  // {
+  //   address: "cfxtest:achkx35n7vngfxgrm7akemk3ftzy47t61yk5nn270s",
+  //   label: "FansCoin",
+  //   symbol: "FC",
+  // },
+  // {
+  //   address: "cfxtest:acepe88unk7fvs18436178up33hb4zkuf62a9dk1gv",
+  //   label: "conflux USDT",
+  //   symbol: "cUSDT",
+  // },
 ];
 
 /**

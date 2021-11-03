@@ -1,9 +1,11 @@
 const testNetUrl = "https://testnet.confluxscan.io"
 const mainNetUrl = "https://confluxscan.io"
+const posNetUrl = "https://posrc.confluxscan.net";
 
 const prefixMap = {
   1: testNetUrl,
   1029: mainNetUrl,
+  8888: posNetUrl,
 }
 
 /**

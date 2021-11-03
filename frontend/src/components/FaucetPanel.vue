@@ -359,16 +359,17 @@ export default {
           value: option,
           label: tokenConfig[option].label,
           // not strict equal
-          disabled:
-            this.$store.state.sdk?.address?.decodeCfxAddress(tokenConfig[option].address)?.netId !=
-            this.$store.state.conflux?.chainId
+          disabled: false
+            /* this.$store.state.sdk?.address?.decodeCfxAddress(tokenConfig[option].address)?.netId !=
+            this.$store.state.conflux?.chainId */
         });
       });
       return tmp;
     },
     faucetContract() {
+      console.log("chainId", this.chainId);
       if (!this.confluxJS || !this.sdk || !this.conflux) return null;
-      if (parseInt(this.chainId) !== 1) return null;
+      if (parseInt(this.chainId) !== 1 && parseInt(this.chainId) !== 8888) return null;
       return this.confluxJS.Contract(faucetContractConfig[parseInt(this.chainId)]);
     },
     isDev() {
@@ -532,6 +533,7 @@ export default {
           .Drip((await this.faucetContract.getClaimAmount(this.contract.address)).toString())
           .toCFX();
 
+        console.log("address", this.contract.address);
         const tx = this.faucetContract.claimToken(this.contract.address);
 
         const estimate = await tx.estimateGasAndCollateral({

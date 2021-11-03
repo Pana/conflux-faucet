@@ -149,6 +149,8 @@ export default {
           return "Conflux Tethys";
         case '0x1':
           return "Conflux Testnet";
+        case '0x22b8':
+          return "Conflux PoS";
         case undefined:
           return "Portal Not Detected";
       }
@@ -202,7 +204,7 @@ export default {
   watch: {
     // conflux.chainId 是异步加载的 这里需要监听该变量的状态
     chainId(newVal) {
-      if (newVal === undefined ||  newVal === "0x1") {
+      if (newVal === undefined ||  newVal === "0x1" || newVal === "0x22b8") {
         this.networkWarning = ""
         this.networkDialogVisible = false;
         return;
